@@ -19,6 +19,8 @@ app.get('/', (req, res) => {
   res.send('Hello, world!')
 })
 
+app.get('/events')
+
 app.use(function errorHandler(error, req, res, next) {
   let response
   if (process.env.NODE_ENV === 'production') {
