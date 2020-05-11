@@ -6,7 +6,7 @@ TRUNCATE
   listItems,
   events,
   lists,
-  users,
+  users
   RESTART IDENTITY CASCADE;
 
 INSERT INTO users (first_name, last_name, email, password, family)
@@ -14,16 +14,16 @@ INSERT INTO users (first_name, last_name, email, password, family)
     (
       'First-1',
       'Last-1',
-      'first@email.com'
+      'first@email.com',
       'password',
-      'family',
+      'family'
     ),
     (
       'First-2',
       'Last-2',
-      'second@email.com'
+      'second@email.com',
       'password',
-      'family',
+      'family'
     );
 
 INSERT INTO lists (title)
@@ -35,12 +35,13 @@ INSERT INTO lists (title)
       'List 2'
     );
 
-INSERT INTO events (title, date, startTime)
+INSERT INTO events (title, event_date, start_time)
   VALUES 
   (
     'event 1 title',
-    '2020-05-10 15:23:54',
-  )
+    '2020-05-10',
+    '15:00'
+  );
 
 INSERT INTO rewards (title, points)
   VALUES
@@ -57,5 +58,5 @@ INSERT INTO rewards (title, points)
       100
     );
 
-
+COMMIT;
 
