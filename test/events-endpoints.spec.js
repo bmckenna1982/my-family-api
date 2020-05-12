@@ -95,7 +95,7 @@ describe.only('Events endpoints', () => {
     })
   })
 
-  describe.only(`POST /events`, function () {
+  describe(`POST /events`, function () {
     it('creates an event, responding with 201 and the new event', () => {
       this.retries(3)
       const newEvent = {
@@ -141,5 +141,39 @@ describe.only('Events endpoints', () => {
             })
       })
     })
+  })
+
+  describe.only(`DELETE /events/:event_id`, () => {
+    context('Given there are events in database', () => {
+      const testEvents = makeEventsArray()
+
+      beforeEach(() => {
+        return db
+          .into('events')
+          .insert(testEvents)
+      })
+
+      it(`responds with 204 and removes the event from the database`, () => {
+        const eventToRemove = testEvents[0]
+        const expectedEvents = testEvents.filter(event => event.id !== eventToRemove.id)
+        return supertest(app)
+          .delete(`/events/${eventToRemove.id}`)
+          .expect(204)
+          .then(res => {
+            supertest(app)
+              .get(`/events`)
+              .expect(expectedEvents)
+          })
+      })
+    })
+
+    context('Given there are no events in teh database', () => {
+      it(`responds with 404 event not found`, () => {
+        return supertest(app)
+          .delete(`/events/12345`)
+          .expect(404, {error: { message: 'Event does not exist' }})
+      })
+    })
+    
   })
 })

@@ -30,6 +30,7 @@ eventsRouter
       })
       .catch(next)
   })
+  
 
 eventsRouter
   .route('/:event_id')
@@ -42,6 +43,13 @@ eventsRouter
           })
         }
         res.json(event)
+      })
+      .catch(next)
+  })
+  .delete((req, res, next) => {
+    EventsService.deleteEvent(req.app.get('db'), req.params.event_id)
+      .then(() => {
+        res.status(204).end
       })
       .catch(next)
   })
