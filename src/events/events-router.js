@@ -1,4 +1,5 @@
 const express = require('express')
+const xss = require('xss')
 const EventsService = require('./events-service')
 
 const eventsRouter = express.Router()
@@ -16,25 +17,25 @@ eventsRouter
   .post(jsonParser, (req, res, next) => {
     const { title, event_date, start_time } = req.body
     const newEvent = { title, event_date, start_time }
-    for (const [key, value] of Object.entries(newEvent)) {
+    for (let [key, value] of Object.entries(newEvent)) {
       if (value == null) {
         return res.status(400).json({
           error: { message: `Missing '${key}' in request body` }
         })
       }
     }
-    
+
     EventsService.insertEvent(req.app.get('db'), newEvent)
       .then(event => {
         res.status(201).location(`/events/${event.id}`).json(event)
       })
       .catch(next)
   })
-  
+
 
 eventsRouter
   .route('/:event_id')
-  .get((req, res, next) => {
+  .all((req, res, next) => {
     EventsService.getById(req.app.get('db'), req.params.event_id)
       .then(event => {
         if (!event) {
@@ -42,14 +43,24 @@ eventsRouter
             error: { message: `Event doesn't exist` }
           })
         }
-        res.json(event)
+        res.event = event //save event for use in next middleware
+        next()
       })
       .catch(next)
+  })
+  .get((req, res, next) => {
+    res.json({
+      id: res.event.id,
+      title: xss(res.event.title),
+      event_date: res.event.event_date,
+      start_time: res.event.start_time,
+      user_id: res.event.user_id
+    })
   })
   .delete((req, res, next) => {
     EventsService.deleteEvent(req.app.get('db'), req.params.event_id)
       .then(() => {
-        res.status(204).end
+        res.status(204).end()
       })
       .catch(next)
   })

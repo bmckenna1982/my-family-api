@@ -1,7 +1,7 @@
 const EventsService = require('../src/events/events-service')
 const knex = require('knex')
 const app = require('../src/app')
-const { makeEventsArray } = require('./events.fixtures')
+const { makeEventsArray, makeMaliciousEvent } = require('./events.fixtures')
 
 describe.only('Events endpoints', () => {
   let db
@@ -91,7 +91,27 @@ describe.only('Events endpoints', () => {
           .get(`/events/${testEvent.id}`)
           .expect(200, testEvent)
       })
+    })
 
+    context(`Given an XSS attack event`, () => {
+      // const testUsers = makeUsersArray()
+      const { maliciousEvent, expectedEvent } = makeMaliciousEvent()
+
+      beforeEach('insert malicious event', () => {
+        return db
+          .into('events')
+          .insert(maliciousEvent)
+      })
+
+      it('removes XSS attack content', () => {
+        return supertest(app)
+          .get(`/events/${maliciousEvent.id}`)
+          .expect(200)
+          .expect(res => {
+            console.log('res.body', res.body)
+            expect(res.body.title).to.eql(expectedEvent.title)
+          })
+      })
     })
   })
 
@@ -124,26 +144,28 @@ describe.only('Events endpoints', () => {
 
     const requiredFields = ['title', 'event_date', 'start_time']
 
-      requiredFields.forEach(field => {
-        const newEvent = {
-          title: 'test new title',
-          event_date: '2020-05-11T04:00:00.000Z',
-          start_time: '15:00'
-        }
+    requiredFields.forEach(field => {
+      const newEvent = {
+        title: 'test new title',
+        event_date: '2020-05-11T04:00:00.000Z',
+        start_time: '15:00'
+      }
 
-        it(`responds with 400 and an error message when the '${field}' is missing`, () => {
-          delete newEvent[field]
-          return supertest(app)
-            .post('events')
-            .send({ newEvent })
-            .expect(400, {
-              error: { message: `Missing '${field}' in request body` }
-            })
+
+      it(`responds with 400 and an error message when the '${field}' is missing`, () => {
+        delete newEvent[field]
+
+        return supertest(app)
+          .post('/events')
+          .send(newEvent)
+          .expect(400, {
+            error: { message: `Missing '${field}' in request body` }
+          })
       })
     })
   })
 
-  describe.only(`DELETE /events/:event_id`, () => {
+  describe(`DELETE /events/:event_id`, () => {
     context('Given there are events in database', () => {
       const testEvents = makeEventsArray()
 
@@ -167,13 +189,13 @@ describe.only('Events endpoints', () => {
       })
     })
 
-    context('Given there are no events in teh database', () => {
+    context('Given there are no events in the database', () => {
       it(`responds with 404 event not found`, () => {
         return supertest(app)
           .delete(`/events/12345`)
-          .expect(404, {error: { message: 'Event does not exist' }})
+          .expect(404, { error: { message: `Event doesn't exist` } })
       })
     })
-    
+
   })
 })

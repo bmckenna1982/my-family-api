@@ -17,6 +17,24 @@ function makeEventsArray() {
   ]
 }
 
+function makeMaliciousEvent() {
+  const maliciousEvent = {
+    id: 911,
+    title: 'Naughty naughty very naughty <script>alert("xss");</script>',
+    event_date: new Date().toISOString(),
+    start_time: '15:00'
+  }
+  const expectedEvent = {
+    ...maliciousEvent,
+    title: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
+  }
+  return {
+    maliciousEvent,
+    expectedEvent,
+  }
+}
+
 module.exports = {
-  makeEventsArray
+  makeEventsArray,
+  makeMaliciousEvent
 }
