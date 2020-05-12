@@ -16,11 +16,14 @@ eventsRouter
   .post(jsonParser, (req, res, next) => {
     const { title, event_date, start_time } = req.body
     const newEvent = { title, event_date, start_time }
-    if (!title) {
-      return res.status(400).json({
-        error: { message: `Missing 'title' in request body` }
-      })
+    for (const [key, value] of Object.entries(newEvent)) {
+      if (value == null) {
+        return res.status(400).json({
+          error: { message: `Missing '${key}' in request body` }
+        })
+      }
     }
+    
     EventsService.insertEvent(req.app.get('db'), newEvent)
       .then(event => {
         res.status(201).location(`/events/${event.id}`).json(event)

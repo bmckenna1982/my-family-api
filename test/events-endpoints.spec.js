@@ -122,16 +122,24 @@ describe.only('Events endpoints', () => {
         )
     })
 
-    it(`responds with 400 and an error message when the 'title' is missing`, () => {
-      return supertest(app)
-        .post('/events')
-        .send({
+    const requiredFields = ['title', 'event_date', 'start_time']
+
+      requiredFields.forEach(field => {
+        const newEvent = {
+          title: 'test new title',
           event_date: '2020-05-11T04:00:00.000Z',
           start_time: '15:00'
-        })
-        .expect(400, {
-          error: { message: `Missing 'title' in request body` }
-        })
+        }
+
+        it(`responds with 400 and an error message when the '${field}' is missing`, () => {
+          delete newEvent[field]
+          return supertest(app)
+            .post('events')
+            .send({ newEvent })
+            .expect(400, {
+              error: { message: `Missing '${field}' in request body` }
+            })
+      })
     })
   })
 })
