@@ -1,26 +1,9 @@
-const EventsService = require('../src/events/events-service')
 const knex = require('knex')
 const app = require('../src/app')
 const { makeEventsArray, makeMaliciousEvent } = require('./events.fixtures')
 
-describe.only('Events endpoints', () => {
+describe('Events endpoints', () => {
   let db
-  // let testEvents = [
-  //   {
-  //     id: 1,
-  //     title: 'event 1 title',
-  //     event_date: '2020-05-11T04:00:00.000Z',
-  //     start_time: '15:00',
-  //     user_id: null
-  //   },
-  //   {
-  //     id: 2,
-  //     title: 'event 2 title',
-  //     event_date: '2020-05-11T04:00:00.000Z',
-  //     start_time: '15:00',
-  //     user_id: null
-  //   },
-  // ]
 
   before(() => {
     db = knex({
@@ -35,11 +18,11 @@ describe.only('Events endpoints', () => {
 
   after(() => db.destroy())
 
-  describe(`GET /events`, () => {
+  describe(`GET /api/events`, () => {
     context(`Given no events in the database`, () => {
       it(`responds with an empty array`, () => {
         return supertest(app)
-          .get('/events')
+          .get('/api/events')
           .expect(200, [])
       })
     })
@@ -54,24 +37,19 @@ describe.only('Events endpoints', () => {
       })
 
       it(`responds with 200 and all the events`, () => {
-        // return EventsService.getAllEvents(db)
         return supertest(app)
-          .get('/events')
+          .get('/api/events')
           .expect(200, testEvents)
-        // .expect(200, testEvents.map(event => ({
-        //   ...event,
-        //   event_date: event.event_date.toLocaleString('en', { timeZone: 'UTC' })
-        // })))
       })
     })
   })
 
-  describe(`GET /events/:event_id`, () => {
+  describe(`GET /api/events/:event_id`, () => {
     context(`Given no events in the database`, () => {
       it(`responds with 404`, () => {
         const event_id = 123456
         return supertest(app)
-          .get(`/events/${event_id}`)
+          .get(`/api/events/${event_id}`)
           .expect(404, { error: { message: `Event doesn't exist` } })
       })
     })
@@ -88,7 +66,7 @@ describe.only('Events endpoints', () => {
       it(`responds with 200 and the specific event`, () => {
         const testEvent = testEvents[0]
         return supertest(app)
-          .get(`/events/${testEvent.id}`)
+          .get(`/api/events/${testEvent.id}`)
           .expect(200, testEvent)
       })
     })
@@ -105,17 +83,16 @@ describe.only('Events endpoints', () => {
 
       it('removes XSS attack content', () => {
         return supertest(app)
-          .get(`/events/${maliciousEvent.id}`)
+          .get(`/api/events/${maliciousEvent.id}`)
           .expect(200)
           .expect(res => {
-            console.log('res.body', res.body)
             expect(res.body.title).to.eql(expectedEvent.title)
           })
       })
     })
   })
 
-  describe(`POST /events`, function () {
+  describe(`POST /api/events`, function () {
     it('creates an event, responding with 201 and the new event', () => {
       this.retries(3)
       const newEvent = {
@@ -124,7 +101,7 @@ describe.only('Events endpoints', () => {
         start_time: '15:00'
       }
       return supertest(app)
-        .post('/events')
+        .post('/api/events')
         .send(newEvent)
         .expect(201)
         .expect(res => {
@@ -133,11 +110,11 @@ describe.only('Events endpoints', () => {
           expect(res.body.start_time).to.eql(newEvent.start_time)
           expect(res.body).to.have.property('id')
           expect(res.body).to.have.property('user_id')
-          expect(res.headers.location).to.eql(`/events/${res.body.id}`)
+          expect(res.headers.location).to.eql(`/api/events/${res.body.id}`)
         })
         .then(postRes =>
           supertest(app)
-            .get(`/events/${postRes.body.id}`)
+            .get(`/api/events/${postRes.body.id}`)
             .expect(postRes.body)
         )
     })
@@ -156,7 +133,7 @@ describe.only('Events endpoints', () => {
         delete newEvent[field]
 
         return supertest(app)
-          .post('/events')
+          .post('/api/events')
           .send(newEvent)
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
@@ -165,7 +142,7 @@ describe.only('Events endpoints', () => {
     })
   })
 
-  describe(`DELETE /events/:event_id`, () => {
+  describe(`DELETE /api/events/:event_id`, () => {
     context('Given there are events in database', () => {
       const testEvents = makeEventsArray()
 
@@ -179,11 +156,11 @@ describe.only('Events endpoints', () => {
         const eventToRemove = testEvents[0]
         const expectedEvents = testEvents.filter(event => event.id !== eventToRemove.id)
         return supertest(app)
-          .delete(`/events/${eventToRemove.id}`)
+          .delete(`/api/events/${eventToRemove.id}`)
           .expect(204)
           .then(res => {
             supertest(app)
-              .get(`/events`)
+              .get(`/api/events`)
               .expect(expectedEvents)
           })
       })
@@ -192,10 +169,89 @@ describe.only('Events endpoints', () => {
     context('Given there are no events in the database', () => {
       it(`responds with 404 event not found`, () => {
         return supertest(app)
-          .delete(`/events/12345`)
+          .delete(`/api/events/12345`)
           .expect(404, { error: { message: `Event doesn't exist` } })
       })
     })
 
+  })
+
+  describe(`PATCH /api/events/:event_id`, () => {
+    context('Given the event is in the database', () => {
+      const testEvents = makeEventsArray()
+
+      beforeEach(() => {
+        return db
+          .into('events')
+          .insert(testEvents)
+      })
+
+      it(`responds with a 204 and updates the event`, () => {
+        const eventToUpdate = testEvents[0]
+        const updatedEvent = {
+          title: 'updated title',
+          event_date: '2021-05-11T04:00:00.000Z',
+          start_time: '17:00'
+        }
+        const expectedEvent = {
+          ...eventToUpdate,
+          ...updatedEvent
+        }
+        return supertest(app)
+          .patch(`/api/events/${eventToUpdate.id}`)
+          .send(updatedEvent)
+          .expect(204)
+          .then(res =>
+            supertest(app)
+              .get(`/api/events/${eventToUpdate.id}`)
+              .expect(expectedEvent)
+          )
+      })
+
+      it(`responds with 400 when no required fields supplied`, () => {
+        const eventToUpdate = testEvents[0]
+        return supertest(app)
+          .patch(`/api/events/${eventToUpdate.id}`)
+          .send({ unMatchedField: 'test' })
+          .expect(400, {
+            error: { message: `Request body must contain either title or points` }
+          })
+      })
+
+      it(`responds with 204 when updating only a subset of fields`, () => {
+        const eventToUpdate = testEvents[0]
+        const updatedEvent = {
+          title: 'updated event title',
+          event_date: '2021-05-11T04:00:00.000Z',
+          start_time: '17:00'
+        }
+        const expectedEvent = {
+          ...eventToUpdate,
+          ...updatedEvent
+        }
+
+        return supertest(app)
+          .patch(`/api/events/${eventToUpdate.id}`)
+          .send({
+            ...updatedEvent,
+            fieldToIgnore: 'should not be in GET response'
+          })
+          .expect(204)
+          .then(res =>
+            supertest(app)
+              .get(`/api/events/${eventToUpdate.id}`)
+              .expect(expectedEvent)
+          )
+      })
+    })
+
+
+    context('Given there event is not in the database', () => {
+      it(`responds with a 404`, () => {
+        return supertest(app)
+          .patch(`/api/events/12345`)
+          .expect(404, { error: { message: `Event doesn't exist` } })
+      })
+    })
   })
 })
