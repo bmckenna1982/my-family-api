@@ -1,9 +1,15 @@
+const path = require('path')
 const express = require('express')
 const xss = require('xss')
 const EventsService = require('./events-service')
 
 const eventsRouter = express.Router()
 const jsonParser = express.json()
+
+const sanitizeEvent = event => ({
+  ...event,
+  title: xss(event.title)
+})
 
 eventsRouter
   .route('/')
@@ -27,7 +33,10 @@ eventsRouter
 
     EventsService.insertEvent(req.app.get('db'), newEvent)
       .then(event => {
-        res.status(201).location(`/events/${event.id}`).json(event)
+        res
+          .status(201)
+          .location(path.posix.join(req.originalUrl, `/${event.id}`))
+          .json(sanitizeEvent(event))
       })
       .catch(next)
   })
@@ -60,6 +69,24 @@ eventsRouter
   .delete((req, res, next) => {
     EventsService.deleteEvent(req.app.get('db'), req.params.event_id)
       .then(() => {
+        res.status(204).end()
+      })
+      .catch(next)
+  })
+  .patch(jsonParser, (req, res, next) => {
+    const { title, event_date, start_time } = req.body
+    const eventToUpdate = { title, event_date, start_time }
+
+    const numberOfValues = Object.values(eventToUpdate).filter(Boolean).length
+    console.log('numberOfValues', numberOfValues)
+    if (numberOfValues === 0) {
+      return res.status(400).json({
+        error: { message: `Request body must contain either title or points` }
+      })
+    }
+
+    EventsService.updateEvent(req.app.get('db'), req.params.event_id, eventToUpdate)
+      .then(numRowsAffected => {
         res.status(204).end()
       })
       .catch(next)
