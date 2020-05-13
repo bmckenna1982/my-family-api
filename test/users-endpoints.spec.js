@@ -3,7 +3,7 @@ const app = require('../src/app')
 const { makeUsersArray, makeMaliciousUser } = require('./users.fixtures')
 const helpers = require('./test-helpers')
 
-describe(`Users endpoints`, () => {
+describe.only(`Users endpoints`, () => {
   let db
 
   before(() => {
@@ -186,7 +186,7 @@ describe(`Users endpoints`, () => {
 
   })
 
-  describe.only(`PATCH /api/users/:user_id`, () => {
+  describe(`PATCH /api/users/:user_id`, () => {
     context('Given the user is in the database', () => {
       const testUsers = makeUsersArray()
 
