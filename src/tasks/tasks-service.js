@@ -1,7 +1,7 @@
 const TasksService = {
 
   getAllTasks(knex) {
-    return knex.select('*').from('tasks')
+    return knex.select('*').from('tasks').orderBy('id', 'asc')
   },
 
   insertTask(knex, newTask) {

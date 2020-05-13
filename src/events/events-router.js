@@ -21,6 +21,7 @@ eventsRouter
       .catch(next)
   })
   .post(jsonParser, (req, res, next) => {
+    console.log('req.body', req.body)
     const { title, event_date, start_time } = req.body
     const newEvent = { title, event_date, start_time }
     for (let [key, value] of Object.entries(newEvent)) {
@@ -41,6 +42,15 @@ eventsRouter
       .catch(next)
   })
 
+eventsRouter
+  .route('/upcoming')
+  .get((req, res, next) => {
+    EventsService.getUpcomingEvents(req.app.get('db'))
+      .then(events => {
+        res.json(events)
+      })
+      .catch(next)
+  })
 
 eventsRouter
   .route('/:event_id')
@@ -91,5 +101,7 @@ eventsRouter
       })
       .catch(next)
   })
+
+
 
 module.exports = eventsRouter

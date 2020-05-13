@@ -3,7 +3,7 @@ const app = require('../src/app')
 const { makeUsersArray, makeMaliciousUser } = require('./users.fixtures')
 const helpers = require('./test-helpers')
 
-describe.only(`Users endpoints`, () => {
+describe(`Users endpoints`, () => {
   let db
 
   before(() => {

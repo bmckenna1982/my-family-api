@@ -119,7 +119,7 @@ describe('Tasks endpoints', () => {
         )
     })
 
-    const requiredFields = ['title', 'points']
+    const requiredFields = ['title', 'points', 'complete']
 
     requiredFields.forEach(field => {
       const newTask = {
@@ -175,7 +175,7 @@ describe('Tasks endpoints', () => {
     })
   })
 
-  describe(`PATCH /api/tasks/:task_id`, () => {
+  describe.only(`PATCH /api/tasks/:task_id`, () => {
     context('Given the task is in the database', () => {
       const testTasks = makeTasksArray()
 
@@ -220,7 +220,7 @@ describe('Tasks endpoints', () => {
         const taskToUpdate = testTasks[0]
         const updatedTask = {
           title: 'updated task title',
-          points: 500
+          complete: true
         }
         const expectedTask = {
           ...taskToUpdate,

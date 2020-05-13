@@ -44,6 +44,34 @@ describe('Events endpoints', () => {
     })
   })
 
+  describe(`GET /api/events/upcoming`, () => {
+    context(`Given no events in the database`, () => {
+      it(`responds with an empty array`, () => {
+        return supertest(app)
+          .get('/api/events/upcoming')
+          .expect(200, [])
+      })
+    })
+
+    context(`Given there are events in the database`, () => {
+      const testEvents = makeEventsArray()
+
+      beforeEach(() => {
+        return db
+          .into('events')
+          .insert(testEvents)
+      })
+
+      it.only(`responds with 200 and next 3 events`, () => {
+        const expectedEvents = testEvents.slice(0, 3)
+
+        return supertest(app)
+          .get('/api/events/upcoming')
+          .expect(200, expectedEvents)
+      })
+    })
+  })
+
   describe(`GET /api/events/:event_id`, () => {
     context(`Given no events in the database`, () => {
       it(`responds with 404`, () => {

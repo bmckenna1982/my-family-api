@@ -3,14 +3,28 @@ function makeEventsArray() {
     {
       id: 1,
       title: 'event 1 title',
-      event_date: '2020-05-11T04:00:00.000Z',
+      event_date: '2020-05-16T04:00:00.000Z',
       start_time: '15:00',
       user_id: null
     },
     {
       id: 2,
       title: 'event 2 title',
-      event_date: '2020-05-11T04:00:00.000Z',
+      event_date: '2020-05-18T04:00:00.000Z',
+      start_time: '15:00',
+      user_id: null
+    },
+    {
+      id: 3,
+      title: 'event 3 title',
+      event_date: '2020-05-20T04:00:00.000Z',
+      start_time: '15:00',
+      user_id: null
+    },
+    {
+      id: 4,
+      title: 'event 4 title',
+      event_date: '2020-05-21T04:00:00.000Z',
       start_time: '15:00',
       user_id: null
     },

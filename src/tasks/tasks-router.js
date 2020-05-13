@@ -73,13 +73,15 @@ tasksRouter
       .catch(next)
   })
   .patch(jsonParser, (req, res, next) => {
-    const { title, points } = req.body
-    const taskToUpdate = { title, points }
-
-    const numberOfValues = Object.values(taskToUpdate).filter(Boolean).length
+    console.log('req.body', req.body)
+    const { title, points, complete } = req.body
+    const taskToUpdate = { title, points, complete }
+    console.log('taskToUpdate', taskToUpdate)
+    const numberOfValues = Object.values(taskToUpdate).filter(value => value !== null).length
+    console.log('numberOfValues', numberOfValues)
     if (numberOfValues === 0) {
       return res.status(400).json({
-        error: { message: `Request body must contain either title or points` }
+        error: { message: `Request body must contain either title, complete or points` }
       })
     }
 
