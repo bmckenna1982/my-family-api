@@ -138,7 +138,7 @@ describe('Lists endpoints', () => {
     })
   })
 
-  describe.only(`DELETE /api/lists/:list_id`, () => {
+  describe(`DELETE /api/lists/:list_id`, () => {
     context('Given there are lists in database', () => {
       const testLists = makeListsArray()
 
@@ -172,7 +172,7 @@ describe('Lists endpoints', () => {
 
   })
 
-  describe.only(`PATCH /api/lists/:list_id`, () => {
+  describe(`PATCH /api/lists/:list_id`, () => {
     context('Given the list is in the database', () => {
       const testLists = makeListsArray()
 

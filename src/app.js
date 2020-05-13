@@ -7,6 +7,8 @@ const { NODE_ENV } = require('./config')
 const eventsRouter = require('./events/events-router')
 const tasksRouter = require('./tasks/tasks-router')
 const listsRouter = require('./lists/lists-router')
+const listItemsRouter = require('./listItems/listItems-router')
+const usersRouter = require('./users/users-router')
 
 const app = express()
 
@@ -21,6 +23,9 @@ app.use(cors())
 app.use('/api/events', eventsRouter)
 app.use('/api/tasks', tasksRouter)
 app.use('/api/lists', listsRouter)
+app.use('/api/listItems', listItemsRouter)
+app.use('/api/users', usersRouter)
+
 // app.get('/', (req, res) => {
 //   res.send('Hello, world!')
 // })
