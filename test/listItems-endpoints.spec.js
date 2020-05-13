@@ -10,7 +10,7 @@ describe('ListItems endpoints', () => {
   before(() => {
     db = knex({
       client: 'pg',
-      connection: process.env.TEST_DB_URL,
+      connection: process.env.TEST_DATABASE_URL,
     })
     app.set('db', db)
   })
@@ -175,6 +175,13 @@ describe('ListItems endpoints', () => {
   describe(`DELETE /api/listItems/:listItem_id`, () => {
     context('Given there are listItems in database', () => {
       const testListItems = makeListItemsArray()
+      const testListArray = makeListsArray()
+
+      beforeEach(() => {
+        return db
+          .into('lists')
+          .insert(testListArray[0])
+      })
 
       beforeEach(() => {
         return db
@@ -209,6 +216,13 @@ describe('ListItems endpoints', () => {
   describe(`PATCH /api/listItems/:listItem_id`, () => {
     context('Given the listItem is in the database', () => {
       const testListItems = makeListItemsArray()
+      const testListArray = makeListsArray()
+
+      beforeEach(() => {
+        return db
+          .into('lists')
+          .insert(testListArray[0])
+      })
 
       beforeEach(() => {
         return db

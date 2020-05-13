@@ -1,6 +1,6 @@
 module.exports = {
   PORT: process.env.PORT || 8000,
   NODE_ENV: process.env.NODE_ENV || 'development',
-  DB_URL: process.env.DB_URL || 'postgresql://bmckenna:K33psq10@localhost/myfamily'
-
+  DATABASE_URL: process.env.DATABASE_URL || 'postgresql://bmckenna:K33psq10@localhost/myfamily',
+  TEST_DATABASE_URL: process.env.TEST_DATABASE_URL || 'postgresql://bmckenna:K33psq10@localhost/myfamily_test'
 }

@@ -9,6 +9,7 @@ const tasksRouter = require('./tasks/tasks-router')
 const listsRouter = require('./lists/lists-router')
 const listItemsRouter = require('./listItems/listItems-router')
 const usersRouter = require('./users/users-router')
+const rewardsRouter = require('./rewards/rewards-router')
 
 const app = express()
 
@@ -25,6 +26,7 @@ app.use('/api/tasks', tasksRouter)
 app.use('/api/lists', listsRouter)
 app.use('/api/listItems', listItemsRouter)
 app.use('/api/users', usersRouter)
+app.use('/api/rewards', rewardsRouter)
 
 // app.get('/', (req, res) => {
 //   res.send('Hello, world!')

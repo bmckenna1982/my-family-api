@@ -26,6 +26,8 @@ function cleanTables(db) {
           trx.raw(`SELECT setval('rewards_id_seq', 0)`)
         ])
       )
+      .catch()
+
   )
 }
 
