@@ -2,6 +2,7 @@ const path = require('path')
 const express = require('express')
 const xss = require('xss')
 const ListsService = require('./lists-service')
+const ListItemsService = require('../listItems/listItems-service')
 
 const listsRouter = express.Router()
 const jsonParser = express.json()
@@ -56,10 +57,7 @@ listsRouter
       .catch(next)
   })
   .get((req, res, next) => {
-    res.json({
-      id: res.list.id,
-      title: xss(res.list.title)
-    })
+    res.json(sanitizeList(res.list))
   })
   .delete((req, res, next) => {
     ListsService.deleteList(req.app.get('db'), req.params.list_id)
@@ -82,6 +80,33 @@ listsRouter
     ListsService.updateList(req.app.get('db'), req.params.list_id, listToUpdate)
       .then(numRowsAffected => {
         res.status(204).end()
+      })
+      .catch(next)
+  })
+
+listsRouter
+  .route('/:list_id/listItems')
+  .all((req, res, next) => {
+    console.log('req.params.list_id', req.params)
+    ListsService.getById(req.app.get('db'), req.params.list_id)
+      .then(list => {
+        if (!list) {
+          return res.status(404).json({
+            error: { message: `List doesn't exist` }
+          })
+        }
+        console.log('list', list)
+        res.list = list //save list for use in next middleware
+        next()
+      })
+      .catch(next)
+  })
+  .get((req, res, next) => {
+    console.log('res.list.id', res.list.id)
+    ListItemsService.getAllListItemsByList(req.app.get('db'), res.list.id)
+      .then(data => {
+        console.log('data', data)
+        res.json(data)
       })
       .catch(next)
   })

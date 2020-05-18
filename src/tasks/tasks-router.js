@@ -74,8 +74,8 @@ tasksRouter
   })
   .patch(jsonParser, (req, res, next) => {
     console.log('req.body', req.body)
-    const { title, points, complete } = req.body
-    const taskToUpdate = { title, points, complete }
+    const { title, points, complete, user_id, } = req.body
+    const taskToUpdate = { title, points, complete, user_id }
     console.log('taskToUpdate', taskToUpdate)
     const numberOfValues = Object.values(taskToUpdate).filter(value => value !== null).length
     console.log('numberOfValues', numberOfValues)

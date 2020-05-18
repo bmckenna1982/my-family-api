@@ -32,7 +32,6 @@ describe(`Users endpoints`, () => {
 
     context(`Given there are users in the database`, () => {
       const testUsers = makeUsersArray()
-      const testUserArray = makeUsersArray()
 
       beforeEach(() => {
         return db

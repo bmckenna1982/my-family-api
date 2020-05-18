@@ -62,7 +62,7 @@ describe('Events endpoints', () => {
           .insert(testEvents)
       })
 
-      it.only(`responds with 200 and next 3 events`, () => {
+      it(`responds with 200 and next 3 events`, () => {
         const expectedEvents = testEvents.slice(0, 3)
 
         return supertest(app)

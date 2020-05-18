@@ -175,7 +175,7 @@ describe('Tasks endpoints', () => {
     })
   })
 
-  describe.only(`PATCH /api/tasks/:task_id`, () => {
+  describe(`PATCH /api/tasks/:task_id`, () => {
     context('Given the task is in the database', () => {
       const testTasks = makeTasksArray()
 

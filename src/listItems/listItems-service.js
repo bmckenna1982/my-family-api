@@ -4,6 +4,10 @@ const ListItemsService = {
     return knex.select('*').from('listitems')
   },
 
+  getAllListItemsByList(knex, list_id) {
+    return knex.select('*').from('listitems').where({ list_id })
+  },
+
   insertListItem(knex, newListItem) {
     return knex
       .insert(newListItem)

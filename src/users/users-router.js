@@ -26,6 +26,7 @@ usersRouter
   .post(jsonParser, (req, res, next) => {
     const { first_name, last_name, email, password, family } = req.body
     const newUser = { first_name, last_name, email, password, family }
+
     for (const [key, value] of Object.entries(newUser)) {
       if (value == null) {
         return res.status(400).json({
@@ -33,14 +34,40 @@ usersRouter
         })
       }
     }
-    UsersService.insertUser(req.app.get('db'), newUser)
-      .then(user => {
-        res
-          .status(201)
-          .location(path.posix.join(req.originalUrl, `/${user.id}`))
-          .json(sanitizeUser(user))
+
+    const passwordError = UsersService.validatePassword(password)
+    if (passwordError)
+      return res.status(400).json({ error: passwordError })
+
+    UsersService.hasUserWithEmail(
+      req.app.get('db'),
+      email
+    )
+      .then(hasUserWithEmail => {
+        if (hasUserWithEmail)
+          return res.status(400).json({ error: 'email already registered' })
+
+        return UsersService.hashPassword(password)
+          .then(hashedPassword => {
+            console.log('hashedPassword', hashedPassword)
+            const newUser = {
+              email,
+              password: hashedPassword,
+              first_name,
+              last_name,
+              family,
+            }
+
+            return UsersService.insertUser(req.app.get('db'), newUser)
+              .then(user => {
+                res
+                  .status(201)
+                  .location(path.posix.join(req.originalUrl, `/${user.id}`))
+                  .json(sanitizeUser(user))
+              })
+              .catch(next)
+          })
       })
-      .catch(next)
   })
 
 usersRouter

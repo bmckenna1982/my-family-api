@@ -1,6 +1,7 @@
 const knex = require('knex')
 const app = require('../src/app')
 const { makeListsArray, makeMaliciousList } = require('./lists.fixtures')
+const { makeListItemsArray, makeMaliciousListItem } = require('./listItems.fixtures')
 const helpers = require('./test-helpers')
 
 describe('Lists endpoints', () => {
@@ -93,6 +94,70 @@ describe('Lists endpoints', () => {
           })
       })
     })
+  })
+
+  describe(`GET /api/lists/:list_id/listItems`, () => {
+    context(`Given no lists in the database`, () => {
+      it(`responds with 404`, () => {
+        const list_id = 123456
+        return supertest(app)
+          .get(`/api/lists/${list_id}/listItems`)
+          .expect(404, { error: { message: `List doesn't exist` } })
+      })
+    })
+
+    context(`Given there are lists in the database`, () => {
+      const testLists = makeListsArray()
+      const testListItems = makeListItemsArray()
+
+      beforeEach(() => {
+        return db
+          .into('lists')
+          .insert(testLists)
+      })
+
+      beforeEach(() => {
+        return db
+          .into('listitems')
+          .insert(testListItems)
+      })
+
+      it(`responds with 200 and the list items`, () => {
+        const testList = testLists[0]
+        return supertest(app)
+          .get(`/api/lists/${testList.id}/listItems`)
+          .expect(200, testListItems)
+      })
+    })
+
+    // context(`Given an XSS attack list`, () => {
+    //   // const testUsers = makeUsersArray()
+    //   const { maliciousListItem, expectedListItem } = makeMaliciousListItem()
+    //   const testLists = makeListsArray()
+    //   const testList = testLists[0]
+    //   const testListItems = makeListItemsArray()
+
+    //   beforeEach(() => {
+    //     return db
+    //       .into('lists')
+    //       .insert(testLists)
+    //   })
+
+    //   beforeEach('insert malicious list item', () => {
+    //     return db
+    //       .into('listitems')
+    //       .insert(maliciousListItem)
+    //   })
+
+    //   it.only('removes XSS attack content', () => {
+    //     return supertest(app)
+    //       .get(`/api/lists/${testList.id}/listItems`)
+    //       .expect(200)
+    //       .expect(res => {
+    //         expect(res.body.title).to.eql(expectedListItem.title)
+    //       })
+    //   })
+    // })
   })
 
   describe(`POST /api/lists`, function () {

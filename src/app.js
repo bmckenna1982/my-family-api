@@ -10,6 +10,7 @@ const listsRouter = require('./lists/lists-router')
 const listItemsRouter = require('./listItems/listItems-router')
 const usersRouter = require('./users/users-router')
 const rewardsRouter = require('./rewards/rewards-router')
+const authRouter = require('./auth/auth-router')
 
 const app = express()
 
@@ -27,43 +28,7 @@ app.use('/api/lists', listsRouter)
 app.use('/api/listItems', listItemsRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/rewards', rewardsRouter)
-
-// app.get('/', (req, res) => {
-//   res.send('Hello, world!')
-// })
-
-// app.get('/events', (req, res, next) => {
-//   // const knexInstance = req.app.get('db')
-//   EventsService.getAllEvents(req.app.get('db'))
-//     .then(events => {
-//       res.json(events)
-//     })
-
-//     .catch(next)
-// })
-
-// app.get('/events/:event_id', (req, res, next) => {
-//   EventsService.getById(req.app.get('db'), req.params.event_id)
-//     .then(event => {
-//       if (!event) {
-//         return res.status(404).json({
-//           error: { message: `Event doesn't exist` }
-//         })
-//       }
-//       res.json(event)
-//     })
-//     .catch(next)
-// })
-
-// app.post('/events', jsonParser, (req, res, next) => {
-//   const { title, event_date, start_time } = req.body
-//   const newEvent = { title, event_date, start_time }
-//   EventsService.insertEvent(req.app.get('db'), newEvent)
-//     .then(event => {
-//       res.status(201).location(`/events/${event.id}`).json(event)
-//     })
-//     .catch(next)
-// })
+app.use('/api/auth', authRouter)
 
 app.use(function errorHandler(error, req, res, next) {
   let response
