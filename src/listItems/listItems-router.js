@@ -68,14 +68,14 @@ listItemsRouter
       .catch(next)
   })
   .patch(jsonParser, (req, res, next) => {
-    const { title, list_id } = req.body
-    const listItemToUpdate = { title, list_id }
+    const { title, list_id, checked } = req.body
+    const listItemToUpdate = { title, list_id, checked }
 
-    const numberOfValues = Object.values(listItemToUpdate).filter(Boolean).length
+    const numberOfValues = Object.values(listItemToUpdate).filter(field => field !== null).length
     console.log('numberOfValues', numberOfValues)
     if (numberOfValues === 0) {
       return res.status(400).json({
-        error: { message: `Request body must contain either title or list_id` }
+        error: { message: `Request body must contain either title, checked or list_id` }
       })
     }
 
