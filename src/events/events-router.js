@@ -2,25 +2,34 @@ const path = require('path')
 const express = require('express')
 const xss = require('xss')
 const EventsService = require('./events-service')
+const { requireAuth } = require('../middleware/jwt-auth')
 
 const eventsRouter = express.Router()
 const jsonParser = express.json()
 
 const sanitizeEvent = event => ({
   ...event,
-  title: xss(event.title)
+  title: xss(event.title),
+  event_date: new Date(event.event_date).toDateString()
+})
+
+const eventDatePrep = event => ({
+  ...event,
+  event_date: new Date(event.event_date).toDateString()
 })
 
 eventsRouter
   .route('/')
+  .all(requireAuth)
   .get((req, res, next) => {
     EventsService.getAllEvents(req.app.get('db'))
       .then(events => {
-        res.json(events)
+        let preppedEvents = events.map(event => eventDatePrep(event))
+        res.json(preppedEvents)
       })
       .catch(next)
   })
-  .post(jsonParser, (req, res, next) => {
+  .post(requireAuth, jsonParser, (req, res, next) => {
     console.log('req.body', req.body)
     const { title, event_date, start_time } = req.body
     const newEvent = { title, event_date, start_time }
@@ -44,17 +53,20 @@ eventsRouter
 
 eventsRouter
   .route('/upcoming')
+  .all(requireAuth)
   .get((req, res, next) => {
     EventsService.getUpcomingEvents(req.app.get('db'))
       .then(events => {
-        res.json(events)
+        let preppedEvents = events.map(event => eventDatePrep(event))
+        console.log('events', preppedEvents)
+        res.json(preppedEvents)
       })
       .catch(next)
   })
 
 eventsRouter
   .route('/:event_id')
-  .all((req, res, next) => {
+  .all(requireAuth, (req, res, next) => {
     EventsService.getById(req.app.get('db'), req.params.event_id)
       .then(event => {
         if (!event) {
@@ -62,19 +74,14 @@ eventsRouter
             error: { message: `Event doesn't exist` }
           })
         }
-        res.event = event //save event for use in next middleware
+        let preppedEvent = eventDatePrep(event)
+        res.event = preppedEvent //save event for use in next middleware
         next()
       })
       .catch(next)
   })
   .get((req, res, next) => {
-    res.json({
-      id: res.event.id,
-      title: xss(res.event.title),
-      event_date: res.event.event_date,
-      start_time: res.event.start_time,
-      user_id: res.event.user_id
-    })
+    res.json(sanitizeEvent(res.event))
   })
   .delete((req, res, next) => {
     EventsService.deleteEvent(req.app.get('db'), req.params.event_id)

@@ -1,9 +1,14 @@
 const knex = require('knex')
 const app = require('../src/app')
 const { makeTasksArray, makeMaliciousTask } = require('./tasks.fixtures')
+const { makeUsersArray } = require('./users.fixtures')
+const helpers = require('./test-helpers')
 
 describe('Tasks endpoints', () => {
   let db
+
+  const testUsers = makeUsersArray()
+  const testUser = testUsers[0]
 
   before(() => {
     db = knex({
@@ -13,16 +18,25 @@ describe('Tasks endpoints', () => {
     app.set('db', db)
   })
 
-  before(() => db('tasks').truncate())
-  afterEach(() => db('tasks').truncate())
+  before('cleanup', () => helpers.cleanTables(db))
 
-  after(() => db.destroy())
+  afterEach('cleanup', () => helpers.cleanTables(db))
+
+  after('disconnect from db', () => db.destroy())
+
+  beforeEach('insert users', () =>
+    helpers.seedUsers(
+      db,
+      testUsers,
+    )
+  )
 
   describe(`GET /api/tasks`, () => {
     context(`Given no tasks in the database`, () => {
       it('responds with an empty array', () => {
         return supertest(app)
           .get('/api/tasks')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, [])
       })
     })
@@ -39,6 +53,7 @@ describe('Tasks endpoints', () => {
       it(`responds with 200 and all the tasks`, () => {
         return supertest(app)
           .get('/api/tasks')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, testTasks)
       })
     })
@@ -50,6 +65,7 @@ describe('Tasks endpoints', () => {
         const task_id = 123456
         return supertest(app)
           .get(`/api/tasks/${task_id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `Task doesn't exist` } })
       })
     })
@@ -67,6 +83,7 @@ describe('Tasks endpoints', () => {
         const testTask = testTasks[0]
         return supertest(app)
           .get(`/api/tasks/${testTask.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, testTask)
       })
     })
@@ -84,6 +101,7 @@ describe('Tasks endpoints', () => {
       it('removes XSS attack content', () => {
         return supertest(app)
           .get(`/api/tasks/${maliciousTask.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200)
           .expect(res => {
             expect(res.body.title).to.eql(expectedTask.title)
@@ -101,6 +119,7 @@ describe('Tasks endpoints', () => {
       }
       return supertest(app)
         .post('/api/tasks')
+        .set('Authorization', helpers.makeAuthHeader(testUser))
         .send(newTask)
         .expect(201)
         .expect(res => {
@@ -115,11 +134,12 @@ describe('Tasks endpoints', () => {
         .then(postRes =>
           supertest(app)
             .get(`/api/tasks/${postRes.body.id}`)
+            .set('Authorization', helpers.makeAuthHeader(testUser))
             .expect(postRes.body)
         )
     })
 
-    const requiredFields = ['title', 'points', 'complete']
+    const requiredFields = ['title', 'points']
 
     requiredFields.forEach(field => {
       const newTask = {
@@ -133,6 +153,7 @@ describe('Tasks endpoints', () => {
 
         return supertest(app)
           .post('/api/tasks')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(newTask)
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
@@ -157,10 +178,12 @@ describe('Tasks endpoints', () => {
         const expectedTasks = testTasks.filter(task => task.id !== taskToRemove.id)
         return supertest(app)
           .delete(`/api/tasks/${taskToRemove.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(204)
           .then(res => {
             supertest(app)
               .get(`/api/tasks`)
+              .set('Authorization', helpers.makeAuthHeader(testUser))
               .expect(expectedTasks)
           })
       })
@@ -170,6 +193,7 @@ describe('Tasks endpoints', () => {
       it(`responds with 404 task not found`, () => {
         return supertest(app)
           .delete(`/api/tasks/12345`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `Task doesn't exist` } })
       })
     })
@@ -197,11 +221,13 @@ describe('Tasks endpoints', () => {
         }
         return supertest(app)
           .patch(`/api/tasks/${taskToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(updatedTask)
           .expect(204)
           .then(res =>
             supertest(app)
               .get(`/api/tasks/${taskToUpdate.id}`)
+              .set('Authorization', helpers.makeAuthHeader(testUser))
               .expect(expectedTask)
           )
       })
@@ -210,6 +236,7 @@ describe('Tasks endpoints', () => {
         const taskToUpdate = testTasks[0]
         return supertest(app)
           .patch(`/api/tasks/${taskToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send({ unMatchedField: 'test' })
           .expect(400, {
             error: { message: `Request body must contain either title or points` }
@@ -229,6 +256,7 @@ describe('Tasks endpoints', () => {
 
         return supertest(app)
           .patch(`/api/tasks/${taskToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send({
             ...updatedTask,
             fieldToIgnore: 'should not be in GET response'
@@ -237,6 +265,7 @@ describe('Tasks endpoints', () => {
           .then(res =>
             supertest(app)
               .get(`/api/tasks/${taskToUpdate.id}`)
+              .set('Authorization', helpers.makeAuthHeader(testUser))
               .expect(expectedTask)
           )
       })

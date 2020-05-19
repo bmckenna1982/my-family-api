@@ -84,6 +84,7 @@ describe('Auth Endpoints', function () {
           .send(userValidCreds)
           .expect(200, {
             authToken: expectedToken,
+            sessionId: testUser.id
           })
       })
 
@@ -115,6 +116,7 @@ describe('Auth Endpoints', function () {
         .set('Authorization', helpers.makeAuthHeader(testUser))
         .expect(200, {
           authToken: expectedToken,
+          sessionId: testUser.id
         })
     })
   })

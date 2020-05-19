@@ -1,10 +1,14 @@
 const knex = require('knex')
 const app = require('../src/app')
 const { makeEventsArray, makeMaliciousEvent } = require('./events.fixtures')
+const { makeUsersArray } = require('./users.fixtures')
+const helpers = require('./test-helpers')
 
 describe('Events endpoints', () => {
   let db
 
+  const testUsers = makeUsersArray()
+  const testUser = testUsers[0]
   before(() => {
     db = knex({
       client: 'pg',
@@ -13,16 +17,26 @@ describe('Events endpoints', () => {
     app.set('db', db)
   })
 
-  before(() => db('events').truncate())
-  afterEach(() => db('events').truncate())
+  before('cleanup', () => helpers.cleanTables(db))
 
-  after(() => db.destroy())
+  afterEach('cleanup', () => helpers.cleanTables(db))
+
+  after('disconnect from db', () => db.destroy())
+
+  beforeEach('insert users', () =>
+    helpers.seedUsers(
+      db,
+      testUsers,
+    )
+  )
 
   describe(`GET /api/events`, () => {
+
     context(`Given no events in the database`, () => {
       it(`responds with an empty array`, () => {
         return supertest(app)
           .get('/api/events')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, [])
       })
     })
@@ -39,6 +53,7 @@ describe('Events endpoints', () => {
       it(`responds with 200 and all the events`, () => {
         return supertest(app)
           .get('/api/events')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, testEvents)
       })
     })
@@ -49,6 +64,7 @@ describe('Events endpoints', () => {
       it(`responds with an empty array`, () => {
         return supertest(app)
           .get('/api/events/upcoming')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, [])
       })
     })
@@ -67,6 +83,7 @@ describe('Events endpoints', () => {
 
         return supertest(app)
           .get('/api/events/upcoming')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, expectedEvents)
       })
     })
@@ -78,6 +95,7 @@ describe('Events endpoints', () => {
         const event_id = 123456
         return supertest(app)
           .get(`/api/events/${event_id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `Event doesn't exist` } })
       })
     })
@@ -95,6 +113,7 @@ describe('Events endpoints', () => {
         const testEvent = testEvents[0]
         return supertest(app)
           .get(`/api/events/${testEvent.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, testEvent)
       })
     })
@@ -112,6 +131,7 @@ describe('Events endpoints', () => {
       it('removes XSS attack content', () => {
         return supertest(app)
           .get(`/api/events/${maliciousEvent.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200)
           .expect(res => {
             expect(res.body.title).to.eql(expectedEvent.title)
@@ -125,16 +145,18 @@ describe('Events endpoints', () => {
       this.retries(3)
       const newEvent = {
         title: 'test new title',
-        event_date: '2020-05-11T04:00:00.000Z',
+        event_date: new Date(),
         start_time: '15:00'
       }
+      console.log('testUser', helpers.makeAuthHeader(testUser))
       return supertest(app)
         .post('/api/events')
+        .set('Authorization', helpers.makeAuthHeader(testUser))
         .send(newEvent)
         .expect(201)
         .expect(res => {
           expect(res.body.title).to.eql(newEvent.title)
-          expect(res.body.event_date).to.eql(newEvent.event_date)
+          expect(res.body.event_date).to.eql(newEvent.event_date.toDateString())
           expect(res.body.start_time).to.eql(newEvent.start_time)
           expect(res.body).to.have.property('id')
           expect(res.body).to.have.property('user_id')
@@ -143,6 +165,7 @@ describe('Events endpoints', () => {
         .then(postRes =>
           supertest(app)
             .get(`/api/events/${postRes.body.id}`)
+            .set('Authorization', helpers.makeAuthHeader(testUser))
             .expect(postRes.body)
         )
     })
@@ -162,6 +185,7 @@ describe('Events endpoints', () => {
 
         return supertest(app)
           .post('/api/events')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(newEvent)
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
@@ -185,6 +209,7 @@ describe('Events endpoints', () => {
         const expectedEvents = testEvents.filter(event => event.id !== eventToRemove.id)
         return supertest(app)
           .delete(`/api/events/${eventToRemove.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(204)
           .then(res => {
             supertest(app)
@@ -198,6 +223,7 @@ describe('Events endpoints', () => {
       it(`responds with 404 event not found`, () => {
         return supertest(app)
           .delete(`/api/events/12345`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `Event doesn't exist` } })
       })
     })
@@ -218,7 +244,7 @@ describe('Events endpoints', () => {
         const eventToUpdate = testEvents[0]
         const updatedEvent = {
           title: 'updated title',
-          event_date: '2021-05-11T04:00:00.000Z',
+          event_date: new Date(new Date()).toDateString(),
           start_time: '17:00'
         }
         const expectedEvent = {
@@ -227,11 +253,13 @@ describe('Events endpoints', () => {
         }
         return supertest(app)
           .patch(`/api/events/${eventToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(updatedEvent)
           .expect(204)
           .then(res =>
             supertest(app)
               .get(`/api/events/${eventToUpdate.id}`)
+              .set('Authorization', helpers.makeAuthHeader(testUser))
               .expect(expectedEvent)
           )
       })
@@ -240,6 +268,7 @@ describe('Events endpoints', () => {
         const eventToUpdate = testEvents[0]
         return supertest(app)
           .patch(`/api/events/${eventToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send({ unMatchedField: 'test' })
           .expect(400, {
             error: { message: `Request body must contain either title or points` }
@@ -250,7 +279,7 @@ describe('Events endpoints', () => {
         const eventToUpdate = testEvents[0]
         const updatedEvent = {
           title: 'updated event title',
-          event_date: '2021-05-11T04:00:00.000Z',
+          event_date: new Date(new Date()).toDateString(),
           start_time: '17:00'
         }
         const expectedEvent = {
@@ -260,6 +289,7 @@ describe('Events endpoints', () => {
 
         return supertest(app)
           .patch(`/api/events/${eventToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send({
             ...updatedEvent,
             fieldToIgnore: 'should not be in GET response'
@@ -268,6 +298,7 @@ describe('Events endpoints', () => {
           .then(res =>
             supertest(app)
               .get(`/api/events/${eventToUpdate.id}`)
+              .set('Authorization', helpers.makeAuthHeader(testUser))
               .expect(expectedEvent)
           )
       })
@@ -278,6 +309,7 @@ describe('Events endpoints', () => {
       it(`responds with a 404`, () => {
         return supertest(app)
           .patch(`/api/events/12345`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `Event doesn't exist` } })
       })
     })

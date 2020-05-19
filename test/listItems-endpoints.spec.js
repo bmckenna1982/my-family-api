@@ -2,11 +2,15 @@ const knex = require('knex')
 const app = require('../src/app')
 const { makeListItemsArray, makeMaliciousListItem } = require('./listItems.fixtures')
 const { makeListsArray } = require('./lists.fixtures')
+const { makeUsersArray } = require('./users.fixtures')
+
 const helpers = require('./test-helpers')
 
 describe('ListItems endpoints', () => {
   let db
 
+  const testUsers = makeUsersArray()
+  const testUser = testUsers[0]
   before(() => {
     db = knex({
       client: 'pg',
@@ -15,18 +19,25 @@ describe('ListItems endpoints', () => {
     app.set('db', db)
   })
 
-  // before(() => db('lists').truncate())
   before('cleanup', () => helpers.cleanTables(db))
-  // afterEach(() => db('lists').truncate())
+
   afterEach('cleanup', () => helpers.cleanTables(db))
 
   after(() => db.destroy())
+
+  beforeEach('insert users', () =>
+    helpers.seedUsers(
+      db,
+      testUsers,
+    )
+  )
 
   describe(`GET /api/listItems`, () => {
     context(`Given no listItems in the database`, () => {
       it(`responds with an empty array`, () => {
         return supertest(app)
           .get('/api/listItems')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, [])
       })
     })
@@ -50,6 +61,7 @@ describe('ListItems endpoints', () => {
       it(`responds with 200 and all the listItems`, () => {
         return supertest(app)
           .get('/api/listItems')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, testListItems)
       })
     })
@@ -61,6 +73,7 @@ describe('ListItems endpoints', () => {
         const listItem_id = 123456
         return supertest(app)
           .get(`/api/listItems/${listItem_id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `ListItem doesn't exist` } })
       })
     })
@@ -85,6 +98,7 @@ describe('ListItems endpoints', () => {
         const testListItem = testListItems[0]
         return supertest(app)
           .get(`/api/listItems/${testListItem.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, testListItem)
       })
     })
@@ -108,6 +122,7 @@ describe('ListItems endpoints', () => {
       it('removes XSS attack content', () => {
         return supertest(app)
           .get(`/api/listItems/${maliciousListItem.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200)
           .expect(res => {
             expect(res.body.title).to.eql(expectedListItem.title)
@@ -134,6 +149,7 @@ describe('ListItems endpoints', () => {
       }
       return supertest(app)
         .post('/api/listItems')
+        .set('Authorization', helpers.makeAuthHeader(testUser))
         .send(newListItem)
         .expect(201)
         .expect(res => {
@@ -146,6 +162,7 @@ describe('ListItems endpoints', () => {
         .then(postRes =>
           supertest(app)
             .get(`/api/listItems/${postRes.body.id}`)
+            .set('Authorization', helpers.makeAuthHeader(testUser))
             .expect(postRes.body)
         )
     })
@@ -164,6 +181,7 @@ describe('ListItems endpoints', () => {
 
         return supertest(app)
           .post('/api/listItems')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(newListItem)
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
@@ -194,6 +212,7 @@ describe('ListItems endpoints', () => {
         const expectedListItems = testListItems.filter(listItem => listItem.id !== listItemToRemove.id)
         return supertest(app)
           .delete(`/api/listItems/${listItemToRemove.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(204)
           .then(res => {
             supertest(app)
@@ -207,6 +226,7 @@ describe('ListItems endpoints', () => {
       it(`responds with 404 listItem not found`, () => {
         return supertest(app)
           .delete(`/api/listItems/12345`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `ListItem doesn't exist` } })
       })
     })
@@ -242,11 +262,13 @@ describe('ListItems endpoints', () => {
         }
         return supertest(app)
           .patch(`/api/listItems/${listItemToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(updatedListItem)
           .expect(204)
           .then(res =>
             supertest(app)
               .get(`/api/listItems/${listItemToUpdate.id}`)
+              .set('Authorization', helpers.makeAuthHeader(testUser))
               .expect(expectedListItem)
           )
       })
@@ -255,9 +277,10 @@ describe('ListItems endpoints', () => {
         const listItemToUpdate = testListItems[0]
         return supertest(app)
           .patch(`/api/listItems/${listItemToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send({ unMatchedField: 'test' })
           .expect(400, {
-            error: { message: `Request body must contain either title or list_id` }
+            error: { message: `Request body must contain either title, checked or list_id` }
           })
       })
 
@@ -274,6 +297,7 @@ describe('ListItems endpoints', () => {
 
         return supertest(app)
           .patch(`/api/listItems/${listItemToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send({
             ...updatedListItem,
             fieldToIgnore: 'should not be in GET response'
@@ -282,6 +306,7 @@ describe('ListItems endpoints', () => {
           .then(res =>
             supertest(app)
               .get(`/api/listItems/${listItemToUpdate.id}`)
+              .set('Authorization', helpers.makeAuthHeader(testUser))
               .expect(expectedListItem)
           )
       })
@@ -292,6 +317,7 @@ describe('ListItems endpoints', () => {
       it(`responds with a 404`, () => {
         return supertest(app)
           .patch(`/api/listItems/12345`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `ListItem doesn't exist` } })
       })
     })
