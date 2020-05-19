@@ -2,11 +2,14 @@ const knex = require('knex')
 const app = require('../src/app')
 const { makeListsArray, makeMaliciousList } = require('./lists.fixtures')
 const { makeListItemsArray, makeMaliciousListItem } = require('./listItems.fixtures')
+const { makeUsersArray } = require('./users.fixtures')
 const helpers = require('./test-helpers')
 
 describe('Lists endpoints', () => {
   let db
 
+  const testUsers = makeUsersArray()
+  const testUser = testUsers[0]
   before(() => {
     db = knex({
       client: 'pg',
@@ -15,18 +18,25 @@ describe('Lists endpoints', () => {
     app.set('db', db)
   })
 
-  // before(() => db('lists').truncate())
   before('cleanup', () => helpers.cleanTables(db))
-  // afterEach(() => db('lists').truncate())
+
   afterEach('cleanup', () => helpers.cleanTables(db))
 
   after(() => db.destroy())
+
+  beforeEach('insert users', () =>
+    helpers.seedUsers(
+      db,
+      testUsers,
+    )
+  )
 
   describe(`GET /api/lists`, () => {
     context(`Given no lists in the database`, () => {
       it(`responds with an empty array`, () => {
         return supertest(app)
           .get('/api/lists')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, [])
       })
     })
@@ -43,6 +53,7 @@ describe('Lists endpoints', () => {
       it(`responds with 200 and all the lists`, () => {
         return supertest(app)
           .get('/api/lists')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, testLists)
       })
     })
@@ -54,6 +65,7 @@ describe('Lists endpoints', () => {
         const list_id = 123456
         return supertest(app)
           .get(`/api/lists/${list_id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `List doesn't exist` } })
       })
     })
@@ -71,6 +83,7 @@ describe('Lists endpoints', () => {
         const testList = testLists[0]
         return supertest(app)
           .get(`/api/lists/${testList.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, testList)
       })
     })
@@ -88,6 +101,7 @@ describe('Lists endpoints', () => {
       it('removes XSS attack content', () => {
         return supertest(app)
           .get(`/api/lists/${maliciousList.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200)
           .expect(res => {
             expect(res.body.title).to.eql(expectedList.title)
@@ -102,6 +116,7 @@ describe('Lists endpoints', () => {
         const list_id = 123456
         return supertest(app)
           .get(`/api/lists/${list_id}/listItems`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `List doesn't exist` } })
       })
     })
@@ -126,6 +141,7 @@ describe('Lists endpoints', () => {
         const testList = testLists[0]
         return supertest(app)
           .get(`/api/lists/${testList.id}/listItems`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, testListItems)
       })
     })
@@ -168,6 +184,7 @@ describe('Lists endpoints', () => {
       }
       return supertest(app)
         .post('/api/lists')
+        .set('Authorization', helpers.makeAuthHeader(testUser))
         .send(newList)
         .expect(201)
         .expect(res => {
@@ -178,6 +195,7 @@ describe('Lists endpoints', () => {
         .then(postRes =>
           supertest(app)
             .get(`/api/lists/${postRes.body.id}`)
+            .set('Authorization', helpers.makeAuthHeader(testUser))
             .expect(postRes.body)
         )
     })
@@ -195,6 +213,7 @@ describe('Lists endpoints', () => {
 
         return supertest(app)
           .post('/api/lists')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(newList)
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
@@ -218,10 +237,12 @@ describe('Lists endpoints', () => {
         const expectedLists = testLists.filter(list => list.id !== listToRemove.id)
         return supertest(app)
           .delete(`/api/lists/${listToRemove.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(204)
           .then(res => {
             supertest(app)
               .get(`/api/lists`)
+              .set('Authorization', helpers.makeAuthHeader(testUser))
               .expect(expectedLists)
           })
       })
@@ -231,6 +252,7 @@ describe('Lists endpoints', () => {
       it(`responds with 404 list not found`, () => {
         return supertest(app)
           .delete(`/api/lists/12345`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `List doesn't exist` } })
       })
     })
@@ -258,11 +280,13 @@ describe('Lists endpoints', () => {
         }
         return supertest(app)
           .patch(`/api/lists/${listToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(updatedList)
           .expect(204)
           .then(res =>
             supertest(app)
               .get(`/api/lists/${listToUpdate.id}`)
+              .set('Authorization', helpers.makeAuthHeader(testUser))
               .expect(expectedList)
           )
       })
@@ -271,6 +295,7 @@ describe('Lists endpoints', () => {
         const listToUpdate = testLists[0]
         return supertest(app)
           .patch(`/api/lists/${listToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send({ unMatchedField: 'test' })
           .expect(400, {
             error: { message: `Request body must contain title` }
@@ -289,6 +314,7 @@ describe('Lists endpoints', () => {
 
         return supertest(app)
           .patch(`/api/lists/${listToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send({
             ...updatedList,
             fieldToIgnore: 'should not be in GET response'
@@ -297,6 +323,7 @@ describe('Lists endpoints', () => {
           .then(res =>
             supertest(app)
               .get(`/api/lists/${listToUpdate.id}`)
+              .set('Authorization', helpers.makeAuthHeader(testUser))
               .expect(expectedList)
           )
       })
@@ -307,6 +334,7 @@ describe('Lists endpoints', () => {
       it(`responds with a 404`, () => {
         return supertest(app)
           .patch(`/api/lists/12345`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `List doesn't exist` } })
       })
     })

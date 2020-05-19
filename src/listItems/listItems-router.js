@@ -2,6 +2,7 @@ const path = require('path')
 const express = require('express')
 const xss = require('xss')
 const ListItemsService = require('./listItems-service')
+const { requireAuth } = require('../middleware/jwt-auth')
 
 const listItemsRouter = express.Router()
 const jsonParser = express.json()
@@ -13,6 +14,7 @@ const sanitizeListItem = listItem => ({
 
 listItemsRouter
   .route('/')
+  .all(requireAuth)
   .get((req, res, next) => {
     ListItemsService.getAllListItems(req.app.get('db'))
       .then(listItems => {
@@ -44,7 +46,7 @@ listItemsRouter
 
 listItemsRouter
   .route('/:listItem_id')
-  .all((req, res, next) => {
+  .all(requireAuth, (req, res, next) => {
     ListItemsService.getById(req.app.get('db'), req.params.listItem_id)
       .then(listItem => {
         if (!listItem) {
@@ -71,7 +73,7 @@ listItemsRouter
     const { title, list_id, checked } = req.body
     const listItemToUpdate = { title, list_id, checked }
 
-    const numberOfValues = Object.values(listItemToUpdate).filter(field => field !== null).length
+    const numberOfValues = Object.values(listItemToUpdate).filter(field => field != null).length
     console.log('numberOfValues', numberOfValues)
     if (numberOfValues === 0) {
       return res.status(400).json({

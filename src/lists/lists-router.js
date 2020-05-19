@@ -3,6 +3,7 @@ const express = require('express')
 const xss = require('xss')
 const ListsService = require('./lists-service')
 const ListItemsService = require('../listItems/listItems-service')
+const { requireAuth } = require('../middleware/jwt-auth')
 
 const listsRouter = express.Router()
 const jsonParser = express.json()
@@ -14,6 +15,7 @@ const sanitizeList = list => ({
 
 listsRouter
   .route('/')
+  .all(requireAuth)
   .get((req, res, next) => {
     ListsService.getAllLists(req.app.get('db'))
       .then(lists => {
@@ -43,7 +45,7 @@ listsRouter
 
 listsRouter
   .route('/:list_id')
-  .all((req, res, next) => {
+  .all(requireAuth, (req, res, next) => {
     ListsService.getById(req.app.get('db'), req.params.list_id)
       .then(list => {
         if (!list) {
@@ -86,7 +88,7 @@ listsRouter
 
 listsRouter
   .route('/:list_id/listItems')
-  .all((req, res, next) => {
+  .all(requireAuth, (req, res, next) => {
     console.log('req.params.list_id', req.params)
     ListsService.getById(req.app.get('db'), req.params.list_id)
       .then(list => {

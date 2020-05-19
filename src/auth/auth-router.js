@@ -32,7 +32,8 @@ authRouter
           const sub = dbUser.email
           const payload = { user_id: dbUser.id }
           res.send({
-            authToken: AuthService.createJwt(sub, payload)
+            authToken: AuthService.createJwt(sub, payload),
+            sessionId: dbUser.id
           })
         })
       })
@@ -43,7 +44,8 @@ authRouter.post('/refresh', requireAuth, (req, res) => {
   const sub = req.user.email;
   const payload = { user_id: req.user.id };
   res.send({
-    authToken: AuthService.createJwt(sub, payload)
+    authToken: AuthService.createJwt(sub, payload),
+    sessionId: req.user.id
   });
 });
 

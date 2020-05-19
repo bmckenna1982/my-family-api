@@ -2,6 +2,7 @@ const path = require('path')
 const express = require('express')
 const xss = require('xss')
 const TasksService = require('./tasks-service')
+const { requireAuth } = require('../middleware/jwt-auth')
 
 const tasksRouter = express.Router()
 const jsonParser = express.json()
@@ -13,6 +14,7 @@ const sanitizeTask = task => ({
 
 tasksRouter
   .route('/')
+  .all(requireAuth)
   .get((req, res, next) => {
     TasksService.getAllTasks(req.app.get('db'))
       .then(tasks => {
@@ -42,7 +44,7 @@ tasksRouter
 
 tasksRouter
   .route('/:task_id')
-  .all((req, res, next) => {
+  .all(requireAuth, (req, res, next) => {
     TasksService.getById(req.app.get('db'), req.params.task_id)
       .then(task => {
         if (!task) {
@@ -56,14 +58,7 @@ tasksRouter
       .catch(next)
   })
   .get((req, res, next) => {
-    res.json({
-      id: res.task.id,
-      title: xss(res.task.title),
-      points: res.task.points,
-      complete: res.task.complete,
-      completed_date: res.task.completed_date,
-      user_id: res.task.user_id
-    })
+    res.json(sanitizeTask(res.task))
   })
   .delete((req, res, next) => {
     TasksService.deleteTask(req.app.get('db'), req.params.task_id)
@@ -77,11 +72,11 @@ tasksRouter
     const { title, points, complete, user_id, } = req.body
     const taskToUpdate = { title, points, complete, user_id }
     console.log('taskToUpdate', taskToUpdate)
-    const numberOfValues = Object.values(taskToUpdate).filter(value => value !== null).length
+    const numberOfValues = Object.values(taskToUpdate).filter(value => value != null).length
     console.log('numberOfValues', numberOfValues)
     if (numberOfValues === 0) {
       return res.status(400).json({
-        error: { message: `Request body must contain either title, complete or points` }
+        error: { message: `Request body must contain either title or points` }
       })
     }
 

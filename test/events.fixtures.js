@@ -1,30 +1,37 @@
 function makeEventsArray() {
+  let date = new Date(new Date().toDateString())
+  returnDate = () => {
+    date.setDate(date.getDate() + 1)
+    return date.toDateString()
+  }
+  console.log('date', date)
+  console.log('this.returnDate()', this.returnDate())
   return [
     {
       id: 1,
       title: 'event 1 title',
-      event_date: '2020-05-16T04:00:00.000Z',
+      event_date: this.returnDate(),
       start_time: '15:00',
       user_id: null
     },
     {
       id: 2,
       title: 'event 2 title',
-      event_date: '2020-05-18T04:00:00.000Z',
+      event_date: this.returnDate(),
       start_time: '15:00',
       user_id: null
     },
     {
       id: 3,
       title: 'event 3 title',
-      event_date: '2020-05-20T04:00:00.000Z',
+      event_date: this.returnDate(),
       start_time: '15:00',
       user_id: null
     },
     {
       id: 4,
       title: 'event 4 title',
-      event_date: '2020-05-21T04:00:00.000Z',
+      event_date: this.returnDate(),
       start_time: '15:00',
       user_id: null
     },

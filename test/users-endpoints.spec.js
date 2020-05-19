@@ -6,6 +6,9 @@ const helpers = require('./test-helpers')
 describe(`Users endpoints`, () => {
   let db
 
+  const testUsers = makeUsersArray()
+  const testUser = testUsers[0]
+
   before(() => {
     db = knex({
       client: 'pg',
@@ -14,51 +17,61 @@ describe(`Users endpoints`, () => {
     app.set('db', db)
   })
 
-  // before(() => db('users').truncate())
+
   before('cleanup', () => helpers.cleanTables(db))
-  // afterEach(() => db('users').truncate())
+
   afterEach('cleanup', () => helpers.cleanTables(db))
 
   after(() => db.destroy())
 
+  beforeEach('insert users', () =>
+    helpers.seedUsers(
+      db,
+      testUsers,
+    )
+  )
+
   describe(`GET /api/users`, () => {
-    context(`Given no users in the database`, () => {
+    context.skip(`Given no users in the database`, () => {
       it(`responds with an empty array`, () => {
         return supertest(app)
           .get('/api/users')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, [])
       })
     })
 
     context(`Given there are users in the database`, () => {
-      const testUsers = makeUsersArray()
+      // const testUsers = makeUsersArray()
 
-      beforeEach(() => {
-        return db
-          .into('users')
-          .insert(testUsers)
-      })
+      // beforeEach(() => {
+      //   return db
+      //     .into('users')
+      //     .insert(testUsers)
+      // })
 
       it(`responds with 200 and all the users`, () => {
         return supertest(app)
           .get('/api/users')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, testUsers)
       })
     })
   })
 
   describe(`GET /api/users/:user_id`, () => {
-    context(`Given no users in the database`, () => {
+    context.skip(`Given no users in the database`, () => {
       it(`responds with 404`, () => {
         const user_id = 123456
         return supertest(app)
           .get(`/api/users/${user_id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `User doesn't exist` } })
       })
     })
 
     context(`Given there are users in the database`, () => {
-      const testUsers = makeUsersArray()
+      // const testUsers = makeUsersArray()
 
       beforeEach(() => {
         return db
@@ -67,9 +80,10 @@ describe(`Users endpoints`, () => {
       })
 
       it(`responds with 200 and the specific user`, () => {
-        const testUser = testUsers[0]
+        // const testUser = testUsers[0]
         return supertest(app)
           .get(`/api/users/${testUser.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200, testUser)
       })
     })
@@ -87,6 +101,7 @@ describe(`Users endpoints`, () => {
       it('removes XSS attack content', () => {
         return supertest(app)
           .get(`/api/users/${maliciousUser.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200)
           .expect(res => {
             expect(res.body.title).to.eql(expectedUser.title)
@@ -107,6 +122,7 @@ describe(`Users endpoints`, () => {
       }
       return supertest(app)
         .post('/api/users')
+        .set('Authorization', helpers.makeAuthHeader(testUser))
         .send(newUser)
         .expect(201)
         .expect(res => {
@@ -122,6 +138,7 @@ describe(`Users endpoints`, () => {
         .then(postRes =>
           supertest(app)
             .get(`/api/users/${postRes.body.id}`)
+            .set('Authorization', helpers.makeAuthHeader(testUser))
             .expect(postRes.body)
         )
     })
@@ -143,6 +160,7 @@ describe(`Users endpoints`, () => {
 
         return supertest(app)
           .post('/api/users')
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(newUser)
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
@@ -153,7 +171,7 @@ describe(`Users endpoints`, () => {
 
   describe(`DELETE /api/users/:user_id`, () => {
     context('Given there are users in database', () => {
-      const testUsers = makeUsersArray()
+      // const testUsers = makeUsersArray()
 
       beforeEach(() => {
         return db
@@ -166,19 +184,22 @@ describe(`Users endpoints`, () => {
         const expectedUsers = testUsers.filter(user => user.id !== userToRemove.id)
         return supertest(app)
           .delete(`/api/users/${userToRemove.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(204)
           .then(res => {
             supertest(app)
               .get(`/api/users`)
+              .set('Authorization', helpers.makeAuthHeader(testUser))
               .expect(expectedUsers)
           })
       })
     })
 
-    context('Given there are no users in the database', () => {
+    context.skip('Given there are no users in the database', () => {
       it(`responds with 404 user not found`, () => {
         return supertest(app)
           .delete(`/api/users/12345`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `User doesn't exist` } })
       })
     })
@@ -187,7 +208,7 @@ describe(`Users endpoints`, () => {
 
   describe(`PATCH /api/users/:user_id`, () => {
     context('Given the user is in the database', () => {
-      const testUsers = makeUsersArray()
+      // const testUsers = makeUsersArray()
 
       beforeEach(() => {
         return db
@@ -210,11 +231,13 @@ describe(`Users endpoints`, () => {
         }
         return supertest(app)
           .patch(`/api/users/${userToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(updatedUser)
           .expect(204)
           .then(res =>
             supertest(app)
               .get(`/api/users/${userToUpdate.id}`)
+              .set('Authorization', helpers.makeAuthHeader(testUser))
               .expect(expectedUser)
           )
       })
@@ -223,6 +246,7 @@ describe(`Users endpoints`, () => {
         const userToUpdate = testUsers[0]
         return supertest(app)
           .patch(`/api/users/${userToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send({ unMatchedField: 'test' })
           .expect(400, {
             error: { message: `Request body must contain either first_name, last_name, email, password or family` }
@@ -245,6 +269,7 @@ describe(`Users endpoints`, () => {
 
         return supertest(app)
           .patch(`/api/users/${userToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send({
             ...updatedUser,
             fieldToIgnore: 'should not be in GET response'
@@ -253,6 +278,7 @@ describe(`Users endpoints`, () => {
           .then(res =>
             supertest(app)
               .get(`/api/users/${userToUpdate.id}`)
+              .set('Authorization', helpers.makeAuthHeader(testUser))
               .expect(expectedUser)
           )
       })
@@ -263,6 +289,7 @@ describe(`Users endpoints`, () => {
       it(`responds with a 404`, () => {
         return supertest(app)
           .patch(`/api/users/12345`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(404, { error: { message: `User doesn't exist` } })
       })
     })
