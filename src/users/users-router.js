@@ -17,9 +17,9 @@ const sanitizeUser = user => ({
 
 usersRouter
   .route('/')
-  .all(requireAuth)
-  .get((req, res, next) => {
-    UsersService.getAllUsers(req.app.get('db'))
+  // .all(requireAuth)
+  .get(requireAuth, (req, res, next) => {
+    UsersService.getAllUsers(req.app.get('db'), req.user.family)
       .then(users => {
         res.json(users)
       })
