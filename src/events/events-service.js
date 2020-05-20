@@ -1,7 +1,7 @@
 const EventsService = {
 
-  getAllEvents(knex) {
-    return knex.select('*').from('events')
+  getAllEvents(knex, family) {
+    return knex.select('*').from('events').where({ family })
   },
 
   insertEvent(knex, newEvent) {

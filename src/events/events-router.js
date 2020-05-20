@@ -22,7 +22,7 @@ eventsRouter
   .route('/')
   .all(requireAuth)
   .get((req, res, next) => {
-    EventsService.getAllEvents(req.app.get('db'))
+    EventsService.getAllEvents(req.app.get('db'), req.user.family)
       .then(events => {
         let preppedEvents = events.map(event => eventDatePrep(event))
         res.json(preppedEvents)

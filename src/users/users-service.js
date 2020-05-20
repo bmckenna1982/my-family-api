@@ -7,8 +7,9 @@ const UsersService = {
     return knex
       // .select('*')
       .from('users AS usr')
-      .where('family', family)
+      .where('usr.family', family)
       .select(
+        'usr.id',
         'usr.first_name',
         'usr.last_name',
         'usr.family',
@@ -93,6 +94,10 @@ const UsersService = {
 
   hashPassword(password) {
     return bcrypt.hash(password, 12)
-  }
+  },
+
+  getTasks(knex, user_id) {
+    return knex.select('*').from('tasks').where({ user_id })
+  },
 }
 module.exports = UsersService

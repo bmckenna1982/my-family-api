@@ -73,6 +73,16 @@ usersRouter
   })
 
 usersRouter
+  .route('/:user_id/tasks')
+  .get(requireAuth, (req, res, next) => {
+    UsersService.getTasks(req.app.get('db'), req.params.user_id)
+      .then(tasks =>
+        res.json(tasks)
+      )
+      .catch(next)
+  })
+
+usersRouter
   .route('/:user_id')
   .all(requireAuth, (req, res, next) => {
     UsersService.getById(req.app.get('db'), req.params.user_id)
