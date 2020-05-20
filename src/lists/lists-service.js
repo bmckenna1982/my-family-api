@@ -1,7 +1,7 @@
 const ListsService = {
 
-  getAllLists(knex) {
-    return knex.select('*').from('lists')
+  getAllLists(knex, family) {
+    return knex.select('*').from('lists').where({ family })
   },
 
   insertList(knex, newList) {

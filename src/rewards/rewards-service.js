@@ -1,7 +1,7 @@
 const RewardsService = {
 
-  getAllRewards(knex) {
-    return knex.select('*').from('rewards')
+  getAllRewards(knex, family) {
+    return knex.select('*').from('rewards').where({ family })
   },
 
   insertReward(knex, newReward) {

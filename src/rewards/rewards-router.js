@@ -2,27 +2,37 @@ const path = require('path')
 const express = require('express')
 const xss = require('xss')
 const RewardsService = require('./rewards-service')
+const { requireAuth } = require('../middleware/jwt-auth')
 
 const rewardsRouter = express.Router()
 const jsonParser = express.json()
 
 const sanitizeReward = reward => ({
   ...reward,
-  title: xss(reward.title)
+  title: xss(reward.title),
+  claimed_date: new Date(reward.claimed_date).toDateString()
+})
+
+const rewardDatePrep = reward => ({
+  ...reward,
+  claimed_date: new Date(reward.claimed_date).toDateString()
 })
 
 rewardsRouter
   .route('/')
+  .all(requireAuth)
   .get((req, res, next) => {
-    RewardsService.getAllRewards(req.app.get('db'))
+    RewardsService.getAllRewards(req.app.get('db'), req.user.family)
       .then(rewards => {
-        res.json(rewards)
+        let preppedRewards = rewards.map(reward => rewardDatePrep(reward))
+        res.json(preppedRewards)
       })
       .catch(next)
   })
   .post(jsonParser, (req, res, next) => {
+    const family = req.user.family
     const { title, points } = req.body
-    const newReward = { title, points }
+    const newReward = { title, points, family }
     for (const [key, value] of Object.entries(newReward)) {
       if (value == null) {
         return res.status(400).json({
@@ -42,7 +52,7 @@ rewardsRouter
 
 rewardsRouter
   .route('/:reward_id')
-  .all((req, res, next) => {
+  .all(requireAuth, (req, res, next) => {
     RewardsService.getById(req.app.get('db'), req.params.reward_id)
       .then(reward => {
         if (!reward) {

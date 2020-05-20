@@ -1,6 +1,6 @@
 const ListItemsService = {
 
-  getAllListItems(knex) {
+  getAllListItems(knex, family) {
     return knex.select('*').from('listitems')
   },
 

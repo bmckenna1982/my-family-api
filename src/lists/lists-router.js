@@ -17,7 +17,7 @@ listsRouter
   .route('/')
   .all(requireAuth)
   .get((req, res, next) => {
-    ListsService.getAllLists(req.app.get('db'))
+    ListsService.getAllLists(req.app.get('db'), req.user.family)
       .then(lists => {
         res.json(lists)
       })
@@ -25,7 +25,8 @@ listsRouter
   })
   .post(jsonParser, (req, res, next) => {
     const { title } = req.body
-    const newList = { title }
+    const family = req.user.id
+    const newList = { title, family }
     for (const [key, value] of Object.entries(newList)) {
       if (value == null) {
         return res.status(400).json({

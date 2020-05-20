@@ -30,9 +30,9 @@ eventsRouter
       .catch(next)
   })
   .post(requireAuth, jsonParser, (req, res, next) => {
-    console.log('req.body', req.body)
+    const family = req.user.id
     const { title, event_date, start_time } = req.body
-    const newEvent = { title, event_date, start_time }
+    const newEvent = { title, event_date, start_time, family }
     for (let [key, value] of Object.entries(newEvent)) {
       if (value == null) {
         return res.status(400).json({

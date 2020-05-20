@@ -78,6 +78,34 @@ INSERT INTO rewards (title, points, family)
       1
     );
 
+INSERT INTO rewards (title, points, claimed, claimed_date, user_id, family)
+  VALUES
+    (
+      'demo claimed 1',
+      100,
+      'true',
+      '2020-05-15',
+      1,
+      1
+
+    ),
+    (
+      'demo claimed 2',
+      200,
+      'true',
+      '2020-05-15',
+      2,
+      1
+    ),
+    (
+      'demo claimed 3',
+      100,
+      'true',
+      '2020-05-15',
+      1,
+      1
+    );    
+
 INSERT INTO listitems (title, list_id)
   VALUES
     (
