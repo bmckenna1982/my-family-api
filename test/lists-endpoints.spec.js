@@ -25,6 +25,10 @@ describe('Lists endpoints', () => {
   after(() => db.destroy())
 
   beforeEach('insert users', () =>
+    helpers.seedFamily(db)
+  )
+
+  beforeEach('insert users', () =>
     helpers.seedUsers(
       db,
       testUsers,

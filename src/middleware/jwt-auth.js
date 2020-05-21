@@ -11,10 +11,9 @@ function requireAuth(req, res, next) {
   }
 
   try {
-    // AuthService.verifyJwt(bearerToken)
-    console.log('bearerToken', bearerToken)
+    // AuthService.verifyJwt(bearerToken)    
     const payload = AuthService.verifyJwt(bearerToken);
-    console.log('verified')
+
     AuthService.getUserWithEmail(req.app.get("db"), payload.sub)
       .then(user => {
         if (!user)

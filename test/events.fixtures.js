@@ -12,6 +12,7 @@ function makeEventsArray() {
       title: 'event 1 title',
       event_date: this.returnDate(),
       start_time: '15:00',
+      family: 1,
       user_id: null
     },
     {
@@ -19,6 +20,7 @@ function makeEventsArray() {
       title: 'event 2 title',
       event_date: this.returnDate(),
       start_time: '15:00',
+      family: 1,
       user_id: null
     },
     {
@@ -26,6 +28,7 @@ function makeEventsArray() {
       title: 'event 3 title',
       event_date: this.returnDate(),
       start_time: '15:00',
+      family: 1,
       user_id: null
     },
     {
@@ -33,6 +36,7 @@ function makeEventsArray() {
       title: 'event 4 title',
       event_date: this.returnDate(),
       start_time: '15:00',
+      family: 1,
       user_id: null
     },
   ]
@@ -43,7 +47,8 @@ function makeMaliciousEvent() {
     id: 911,
     title: 'Naughty naughty very naughty <script>alert("xss");</script>',
     event_date: new Date().toISOString(),
-    start_time: '15:00'
+    start_time: '15:00',
+    family: 1,
   }
   const expectedEvent = {
     ...maliciousEvent,

@@ -6,7 +6,8 @@ function makeRewardsArray() {
       points: 100,
       claimed: false,
       claimed_date: null,
-      user_id: null
+      user_id: null,
+      family: 1
     },
     {
       id: 2,
@@ -14,7 +15,8 @@ function makeRewardsArray() {
       points: 50,
       claimed: false,
       claimed_date: null,
-      user_id: null
+      user_id: null,
+      family: 1
     },
   ]
 }
@@ -26,7 +28,8 @@ function makeMaliciousReward() {
     points: 50,
     claimed: false,
     claimed_date: null,
-    user_id: null
+    user_id: null,
+    family: 1
   }
   const expectedReward = {
     ...maliciousReward,

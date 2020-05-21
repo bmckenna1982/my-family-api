@@ -17,6 +17,21 @@ function seedUsers(db, users) {
     )
 }
 
+function seedFamily(db) {
+  let family = {
+    id: 1,
+    family_name: 'test'
+  }
+  return db.into('family').insert(family)
+    .then(() =>
+      // update the auto sequence to stay in sync
+      db.raw(
+        `SELECT setval('family_id_seq', ?)`,
+        1,
+      )
+    )
+}
+
 function cleanTables(db) {
   return db.transaction(trx =>
     trx.raw(
@@ -25,18 +40,21 @@ function cleanTables(db) {
         lists,
         listItems,
         users,
+        family,
         tasks,
         rewards
       `
     )
       .then(() =>
         Promise.all([
+          trx.raw(`ALTER SEQUENCE family_id_seq minvalue 0 START WITH 1`),
           trx.raw(`ALTER SEQUENCE events_id_seq minvalue 0 START WITH 1`),
           trx.raw(`ALTER SEQUENCE users_id_seq minvalue 0 START WITH 1`),
           trx.raw(`ALTER SEQUENCE lists_id_seq minvalue 0 START WITH 1`),
           trx.raw(`ALTER SEQUENCE listItems_id_seq minvalue 0 START WITH 1`),
           trx.raw(`ALTER SEQUENCE tasks_id_seq minvalue 0 START WITH 1`),
           trx.raw(`ALTER SEQUENCE rewards_id_seq minvalue 0 START WITH 1`),
+          trx.raw(`SELECT setval('family_id_seq', 0)`),
           trx.raw(`SELECT setval('events_id_seq', 0)`),
           trx.raw(`SELECT setval('users_id_seq', 0)`),
           trx.raw(`SELECT setval('lists_id_seq', 0)`),
@@ -61,5 +79,6 @@ function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
 module.exports = {
   cleanTables,
   seedUsers,
-  makeAuthHeader
+  makeAuthHeader,
+  seedFamily
 }

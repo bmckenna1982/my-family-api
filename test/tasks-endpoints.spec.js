@@ -4,7 +4,7 @@ const { makeTasksArray, makeMaliciousTask } = require('./tasks.fixtures')
 const { makeUsersArray } = require('./users.fixtures')
 const helpers = require('./test-helpers')
 
-describe('Tasks endpoints', () => {
+describe.only('Tasks endpoints', () => {
   let db
 
   const testUsers = makeUsersArray()
@@ -23,6 +23,10 @@ describe('Tasks endpoints', () => {
   afterEach('cleanup', () => helpers.cleanTables(db))
 
   after('disconnect from db', () => db.destroy())
+
+  beforeEach('insert users', () =>
+    helpers.seedFamily(db)
+  )
 
   beforeEach('insert users', () =>
     helpers.seedUsers(
@@ -199,7 +203,7 @@ describe('Tasks endpoints', () => {
     })
   })
 
-  describe(`PATCH /api/tasks/:task_id`, () => {
+  describe.skip(`PATCH /api/tasks/:task_id`, () => {
     context('Given the task is in the database', () => {
       const testTasks = makeTasksArray()
 
@@ -213,7 +217,7 @@ describe('Tasks endpoints', () => {
         const taskToUpdate = testTasks[0]
         const updatedTask = {
           title: 'updated title',
-          points: 500
+          points: 500,
         }
         const expectedTask = {
           ...taskToUpdate,

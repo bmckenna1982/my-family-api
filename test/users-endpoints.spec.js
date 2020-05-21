@@ -3,7 +3,7 @@ const app = require('../src/app')
 const { makeUsersArray, makeMaliciousUser } = require('./users.fixtures')
 const helpers = require('./test-helpers')
 
-describe(`Users endpoints`, () => {
+describe.skip(`Users endpoints`, () => {
   let db
 
   const testUsers = makeUsersArray()
@@ -25,6 +25,10 @@ describe(`Users endpoints`, () => {
   after(() => db.destroy())
 
   beforeEach('insert users', () =>
+    helpers.seedFamily(db)
+  )
+
+  beforeEach('insert users', () =>
     helpers.seedUsers(
       db,
       testUsers,
@@ -42,14 +46,6 @@ describe(`Users endpoints`, () => {
     })
 
     context(`Given there are users in the database`, () => {
-      // const testUsers = makeUsersArray()
-
-      // beforeEach(() => {
-      //   return db
-      //     .into('users')
-      //     .insert(testUsers)
-      // })
-
       it(`responds with 200 and all the users`, () => {
         return supertest(app)
           .get('/api/users')
@@ -71,16 +67,7 @@ describe(`Users endpoints`, () => {
     })
 
     context(`Given there are users in the database`, () => {
-      // const testUsers = makeUsersArray()
-
-      beforeEach(() => {
-        return db
-          .into('users')
-          .insert(testUsers)
-      })
-
       it(`responds with 200 and the specific user`, () => {
-        // const testUser = testUsers[0]
         return supertest(app)
           .get(`/api/users/${testUser.id}`)
           .set('Authorization', helpers.makeAuthHeader(testUser))
@@ -118,7 +105,7 @@ describe(`Users endpoints`, () => {
         last_name: 'new last name',
         email: 'new@email.com',
         password: 'newPassword',
-        family: 'newFamily'
+        family: 1
       }
       return supertest(app)
         .post('/api/users')
@@ -171,13 +158,6 @@ describe(`Users endpoints`, () => {
 
   describe(`DELETE /api/users/:user_id`, () => {
     context('Given there are users in database', () => {
-      // const testUsers = makeUsersArray()
-
-      beforeEach(() => {
-        return db
-          .into('users')
-          .insert(testUsers)
-      })
 
       it(`responds with 204 and removes the user from the database`, () => {
         const userToRemove = testUsers[0]
@@ -208,13 +188,6 @@ describe(`Users endpoints`, () => {
 
   describe(`PATCH /api/users/:user_id`, () => {
     context('Given the user is in the database', () => {
-      // const testUsers = makeUsersArray()
-
-      beforeEach(() => {
-        return db
-          .into('users')
-          .insert(testUsers)
-      })
 
       it(`responds with a 204 and updates the user`, () => {
         const userToUpdate = testUsers[0]

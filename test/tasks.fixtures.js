@@ -6,6 +6,7 @@ function makeTasksArray() {
       points: 100,
       complete: false,
       completed_date: null,
+      family: 1,
       user_id: null
     },
     {
@@ -14,6 +15,7 @@ function makeTasksArray() {
       points: 50,
       complete: false,
       completed_date: null,
+      family: 1,
       user_id: null
     },
   ]
@@ -26,6 +28,7 @@ function makeMaliciousTask() {
     points: 50,
     complete: false,
     completed_date: null,
+    family: 1,
     user_id: null
   }
   const expectedTask = {
