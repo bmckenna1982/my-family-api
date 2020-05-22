@@ -17,17 +17,18 @@ function seedUsers(db, users) {
     )
 }
 
-function seedFamily(db) {
-  let family = {
-    id: 1,
-    family_name: 'test'
-  }
-  return db.into('family').insert(family)
+function seedFamilies(db, families) {
+  // const families = makeFamiliesArray()
+  // let family = {
+  //   id: 1,
+  //   family_name: 'test'
+  // }
+  return db.into('family').insert(families)
     .then(() =>
       // update the auto sequence to stay in sync
       db.raw(
         `SELECT setval('family_id_seq', ?)`,
-        1,
+        [families[families.length - 1].id],
       )
     )
 }
@@ -76,9 +77,23 @@ function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
   return `Bearer ${token}`
 }
 
+function makeFamiliesArray() {
+  return [
+    {
+      id: 1,
+      family_name: 'Test 1 Family',
+    },
+    {
+      id: 2,
+      family_name: 'Test 2 Family',
+    },
+  ]
+}
+
 module.exports = {
   cleanTables,
   seedUsers,
   makeAuthHeader,
-  seedFamily
+  seedFamilies,
+  makeFamiliesArray
 }
