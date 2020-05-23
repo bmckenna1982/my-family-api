@@ -18,6 +18,13 @@ const FamiliesService = {
       .from('family')
       .where({ id })
       .first()
-  }
+  },
+
+  hasFamilyWithName(db, family_name) {
+    return db('family')
+      .where({ family_name })
+      .first()
+      .then(family => !!family)
+  },
 }
 module.exports = FamiliesService

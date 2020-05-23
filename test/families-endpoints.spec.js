@@ -38,7 +38,7 @@ describe('Families endpoints', () => {
   //   )
   // )
 
-  describe(`GET /api/families`, () => {
+  describe.only(`GET /api/families`, () => {
     it(`responds with 200 and all the lists`, () => {
       return supertest(app)
         .get('/api/families')

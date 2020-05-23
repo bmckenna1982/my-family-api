@@ -30,15 +30,28 @@ familiesRouter
         })
       }
     }
-    FamiliesService.insertFamily(req.app.get('db'), newFamily)
-      .then(family => {
-        res
-          .status(201)
-          .location(path.posix.join(req.originalUrl, `/${family.id}`))
-          .json(sanitizeFamily(family))
+
+    FamiliesService.hasFamilyWithName(
+      req.app.get('db'),
+      family_name
+    )
+      .then(hasFamilyWithName => {
+        console.log('non existant')
+        if (hasFamilyWithName)
+          return res.status(400).json({ error: 'family name already registered' })
+
+        return FamiliesService.insertFamily(req.app.get('db'), newFamily)
+          .then(family => {
+            res
+              .status(201)
+              .location(path.posix.join(req.originalUrl, `/${family.id}`))
+              .json(sanitizeFamily(family))
+          })
+          .catch(next)
       })
-      .catch(next)
+
   })
+
 
 familiesRouter
   .route('/:family_id')
