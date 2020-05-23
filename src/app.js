@@ -11,6 +11,7 @@ const listItemsRouter = require('./listItems/listItems-router')
 const usersRouter = require('./users/users-router')
 const rewardsRouter = require('./rewards/rewards-router')
 const authRouter = require('./auth/auth-router')
+const familiesRouter = require('./families/families-router')
 
 const app = express()
 
@@ -29,6 +30,7 @@ app.use('/api/listItems', listItemsRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/rewards', rewardsRouter)
 app.use('/api/auth', authRouter)
+app.use('/api/families', familiesRouter)
 
 app.use(function errorHandler(error, req, res, next) {
   let response

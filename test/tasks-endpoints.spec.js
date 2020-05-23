@@ -4,7 +4,7 @@ const { makeTasksArray, makeMaliciousTask } = require('./tasks.fixtures')
 const { makeUsersArray } = require('./users.fixtures')
 const helpers = require('./test-helpers')
 
-describe.only('Tasks endpoints', () => {
+describe('Tasks endpoints', () => {
   let db
 
   const testUsers = makeUsersArray()
