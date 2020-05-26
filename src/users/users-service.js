@@ -43,30 +43,29 @@ const UsersService = {
         'usr.last_name',
         'usr.family',
         'usr.email',
-        knex.raw(
-          `sum(tasks.points) AS points`
-        ),
+        // knex.raw(
+        //   `sum(tasks.points) AS points`
+        // ),
       )
+      .sum('tasks.points as p')
       .leftJoin(
         'tasks',
         'usr.id',
         'tasks.user_id',
       )
-      // .sum('tasks.points as points')
-      // .leftJoin(
-      //   'rewards',
-      //   function () {
-      //     this
-      //       .on('usr.id', 'rewards.user_id')
-      //     // .on('rewards.claimed', knex.raw('?', ['true']))
-      //   }
-      // )
-      // .sum('rewards.points as rPoints')
+
+      .leftJoin(
+        'rewards',
+        'usr.id',
+        'rewards.user_id'
+      )
+      .sum('rewards.points as rP')
       // .innerJoin(
       //   'rewards',
       //   'usr.id',
       //   'rewards.user_id',
       // )
+      // .where(knex.raw('rewards.claimed = true'))
       .groupBy('usr.id')
       .first()
   },
