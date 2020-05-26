@@ -12,6 +12,7 @@ const usersRouter = require('./users/users-router')
 const rewardsRouter = require('./rewards/rewards-router')
 const authRouter = require('./auth/auth-router')
 const familiesRouter = require('./families/families-router')
+const pointsRouter = require('./points/points-router')
 
 const app = express()
 
@@ -31,6 +32,7 @@ app.use('/api/users', usersRouter)
 app.use('/api/rewards', rewardsRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/families', familiesRouter)
+app.use('/api/points', pointsRouter)
 
 app.use(function errorHandler(error, req, res, next) {
   let response
