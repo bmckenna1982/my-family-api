@@ -25,7 +25,7 @@ listsRouter
   })
   .post(jsonParser, (req, res, next) => {
     const { title } = req.body
-    const family = req.user.id
+    const family = req.user.family
     const newList = { title, family }
     for (const [key, value] of Object.entries(newList)) {
       if (value == null) {
@@ -90,7 +90,7 @@ listsRouter
 listsRouter
   .route('/:list_id/listItems')
   .all(requireAuth, (req, res, next) => {
-    console.log('req.params.list_id', req.params)
+    // console.log('req.params.list_id', req.params)
     ListsService.getById(req.app.get('db'), req.params.list_id)
       .then(list => {
         if (!list) {
@@ -98,17 +98,17 @@ listsRouter
             error: { message: `List doesn't exist` }
           })
         }
-        console.log('list', list)
+        // console.log('list', list)
         res.list = list //save list for use in next middleware
         next()
       })
       .catch(next)
   })
   .get((req, res, next) => {
-    console.log('res.list.id', res.list.id)
+    // console.log('res.list.id', res.list.id)
     ListItemsService.getAllListItemsByList(req.app.get('db'), res.list.id)
       .then(data => {
-        console.log('data', data)
+        // console.log('data', data)
         res.json(data)
       })
       .catch(next)

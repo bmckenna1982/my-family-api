@@ -4,6 +4,10 @@ const TasksService = {
     return knex.select('*').from('tasks').orderBy('id', 'asc')
   },
 
+  getAllTasksByFamily(knex, family) {
+    return knex.select('*').from('tasks').orderBy('id', 'asc').where({ family })
+  },
+
   insertTask(knex, newTask) {
     return knex
       .insert(newTask)

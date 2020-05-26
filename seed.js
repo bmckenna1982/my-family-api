@@ -29,7 +29,7 @@ const clearSchedule = () => {
   )
 }
 
-console.log('schedule', schedule)
+// console.log('schedule', schedule)
 const inserts = function () {
   const insertPromises = [];
   schedule.forEach(function (game) {
@@ -42,16 +42,16 @@ const inserts = function () {
 
 clearSchedule()
   .then(() => {
-    console.log('Table cleared')
+    // console.log('Table cleared')
   })
   .then(inserts)
   .then(() => {
-    console.log('inserts done')
+    // console.log('inserts done')
   })
   .then(() => {
     process.exit(0)
   })
   .catch((error) => {
     db.destroy()
-    console.log('error', error)
+    // console.log('error', error)
   })

@@ -76,9 +76,10 @@ rewardsRouter
       .catch(next)
   })
   .patch(jsonParser, (req, res, next) => {
-    const { title, points } = req.body
-    const rewardToUpdate = { title, points }
-
+    const { title, points, claimed, claimed_date } = req.body
+    const user_id = req.user.id
+    const rewardToUpdate = { title, points, user_id, claimed, claimed_date }
+    // console.log('rewardToUpdate', rewardToUpdate)
     const numberOfValues = Object.values(rewardToUpdate).filter(Boolean).length
     if (numberOfValues === 0) {
       return res.status(400).json({

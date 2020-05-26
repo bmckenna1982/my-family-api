@@ -16,7 +16,7 @@ familiesRouter
   .get((req, res, next) => {
     FamiliesService.getAllFamilies(req.app.get('db'))
       .then(families => {
-        console.log('families', families)
+        // console.log('families', families)
         res.json(families)
       })
       .catch(next)
@@ -37,7 +37,7 @@ familiesRouter
       family_name
     )
       .then(hasFamilyWithName => {
-        console.log('non existant')
+        // console.log('non existant')
         if (hasFamilyWithName)
           return res.status(400).json({ error: 'family name already registered' })
 

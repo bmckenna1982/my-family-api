@@ -74,7 +74,7 @@ listItemsRouter
     const listItemToUpdate = { title, list_id, checked }
 
     const numberOfValues = Object.values(listItemToUpdate).filter(field => field != null).length
-    console.log('numberOfValues', numberOfValues)
+    // console.log('numberOfValues', numberOfValues)
     if (numberOfValues === 0) {
       return res.status(400).json({
         error: { message: `Request body must contain either title, checked or list_id` }

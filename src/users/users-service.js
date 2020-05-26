@@ -37,6 +37,7 @@ const UsersService = {
   getById(knex, id) {
     return knex
       .from('users AS usr')
+      .where('usr.id', id)
       .select(
         'usr.first_name',
         'usr.last_name',
@@ -51,7 +52,21 @@ const UsersService = {
         'usr.id',
         'tasks.user_id',
       )
-      .where('usr.id', id)
+      // .sum('tasks.points as points')
+      // .leftJoin(
+      //   'rewards',
+      //   function () {
+      //     this
+      //       .on('usr.id', 'rewards.user_id')
+      //     // .on('rewards.claimed', knex.raw('?', ['true']))
+      //   }
+      // )
+      // .sum('rewards.points as rPoints')
+      // .innerJoin(
+      //   'rewards',
+      //   'usr.id',
+      //   'rewards.user_id',
+      // )
       .groupBy('usr.id')
       .first()
   },
