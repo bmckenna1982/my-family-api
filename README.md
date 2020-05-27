@@ -28,18 +28,23 @@ Run the tests `npm test`
 |Path       |Method    |Protected |
 |:-------------|:---------|:---------|
 |/api/login |POST      |        |
-|/api/schedule |GET | |
+|/api/events |GET | |
 | |POST |Yes |
-|/api/schedule/:gameId |GET |Yes |
-|/api/schedule/:gameId/rsvp |GET |Yes |
-|/api/message-board |GET |Yes |
+|/api/events/upcoming |GET |Yes |
+|/api/families/ |GET |Yes |
 | |POST |Yes |
-|/api/message-board/:messageId |GET |Yes |
+|/api/families/:familyId |GET |Yes |
+|/api/lists |GET |Yes |
+| |POST |Yes |
+|/api/listItems/ |GET |Yes |
+|/api/listItems/:listItemsId |GET |Yes |
 | |DELETE |Yes |
-|/api/latest-message |GET | |
-|/api/comments |GET |Yes |
+|/api/points |GET |Yes |
+|/api/rewards |GET |Yes |
 | |POST |Yes |
-|/api/comments/:commentId|GET |Yes |
+|/api/rewards/:rewardId |PATCH |YES |
+|/api/tasks |GET |Yes |
+|/api/tasks/:task_Id|GET |Yes |
 | |DELETE |Yes |
 | |PATCH |Yes |
 |/api/users |POST | |
