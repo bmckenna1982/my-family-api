@@ -9,7 +9,6 @@ describe('Auth Endpoints', function () {
 
   const testUsers = makeUsersArray()
   const testUser = testUsers[0]
-  // console.log('testUser.email', testUser.email)
 
   before('make knex instance', () => {
     db = knex({
@@ -101,7 +100,6 @@ describe('Auth Endpoints', function () {
     )
 
     it(`responds 200 and JWT auth token using secret`, () => {
-      // console.log('testUser', testUser)
       const expectedToken = jwt.sign(
         { user_id: testUser.id },
         process.env.JWT_SECRET,

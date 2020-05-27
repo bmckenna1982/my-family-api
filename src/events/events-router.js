@@ -22,7 +22,6 @@ eventsRouter
   .route('/')
   .all(requireAuth)
   .get((req, res, next) => {
-    // console.log('req', req.user)
     EventsService.getAllEvents(req.app.get('db'), req.user.family)
       .then(events => {
         let preppedEvents = events.map(event => eventDatePrep(event))
@@ -59,7 +58,6 @@ eventsRouter
     EventsService.getUpcomingEvents(req.app.get('db'), req.user.family)
       .then(events => {
         let preppedEvents = events.map(event => eventDatePrep(event))
-        // console.log('events', preppedEvents)
         res.json(preppedEvents)
       })
       .catch(next)
@@ -96,7 +94,7 @@ eventsRouter
     const eventToUpdate = { title, event_date, start_time }
 
     const numberOfValues = Object.values(eventToUpdate).filter(Boolean).length
-    // console.log('numberOfValues', numberOfValues)
+
     if (numberOfValues === 0) {
       return res.status(400).json({
         error: { message: `Request body must contain either title or points` }

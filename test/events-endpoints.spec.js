@@ -152,7 +152,6 @@ describe('Events endpoints', () => {
         event_date: new Date(),
         start_time: '15:00'
       }
-      // console.log('testUser', helpers.makeAuthHeader(testUser))
       return supertest(app)
         .post('/api/events')
         .set('Authorization', helpers.makeAuthHeader(testUser))

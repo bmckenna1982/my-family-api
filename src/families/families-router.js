@@ -16,7 +16,6 @@ familiesRouter
   .get((req, res, next) => {
     FamiliesService.getAllFamilies(req.app.get('db'))
       .then(families => {
-        // console.log('families', families)
         res.json(families)
       })
       .catch(next)
@@ -37,7 +36,6 @@ familiesRouter
       family_name
     )
       .then(hasFamilyWithName => {
-        // console.log('non existant')
         if (hasFamilyWithName)
           return res.status(400).json({ error: 'family name already registered' })
 
@@ -72,29 +70,5 @@ familiesRouter
   .get((req, res, next) => {
     res.json(sanitizeFamily(res.family))
   })
-// .delete((req, res, next) => {
-//   FamiliesService.deleteFamily(req.app.get('db'), req.params.family_id)
-//     .then(numRowsAffected => {
-//       res.status(204).end()
-//     })
-//     .catch(next)
-// })
-// .patch(jsonParser, (req, res, next) => {
-//   const { title } = req.body
-//   const familyToUpdate = { title }
-
-//   const numberOfValues = Object.values(familyToUpdate).filter(Boolean).length
-//   if (numberOfValues === 0) {
-//     return res.status(400).json({
-//       error: { message: `Request body must contain title` }
-//     })
-//   }
-
-//   FamiliesService.updateFamily(req.app.get('db'), req.params.family_id, familyToUpdate)
-//     .then(numRowsAffected => {
-//       res.status(204).end()
-//     })
-//     .catch(next)
-// })
 
 module.exports = familiesRouter

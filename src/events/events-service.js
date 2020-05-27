@@ -36,7 +36,7 @@ const EventsService = {
   getUpcomingEvents(knex, family) {
     const currentDateTime = new Date()
     const currentDateStr = `${currentDateTime.getUTCMonth() + 1}/${currentDateTime.getUTCDate()}/${currentDateTime.getUTCFullYear()}`
-    // console.log('currentDate', currentDateStr)
+
     return knex.select('*').from('events')
       .where('event_date', '>=', currentDateStr)
       .where({ family })

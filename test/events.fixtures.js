@@ -4,8 +4,6 @@ function makeEventsArray() {
     date.setDate(date.getDate() + 1)
     return date.toDateString()
   }
-  // console.log('date', date)
-  // console.log('this.returnDate()', this.returnDate())
   return [
     {
       id: 1,
