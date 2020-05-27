@@ -56,7 +56,7 @@ eventsRouter
   .route('/upcoming')
   .all(requireAuth)
   .get((req, res, next) => {
-    EventsService.getUpcomingEvents(req.app.get('db'))
+    EventsService.getUpcomingEvents(req.app.get('db'), req.user.family)
       .then(events => {
         let preppedEvents = events.map(event => eventDatePrep(event))
         // console.log('events', preppedEvents)
