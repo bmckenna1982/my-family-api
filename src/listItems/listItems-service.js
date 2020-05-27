@@ -39,7 +39,6 @@ const ListItemsService = {
   },
 
   updateListItem(knex, id, newListItemFields) {
-    // console.log('newListItemFields', newListItemFields)
     return knex('listitems')
       .where({ id })
       .update(newListItemFields)

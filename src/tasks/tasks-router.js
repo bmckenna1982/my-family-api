@@ -18,7 +18,6 @@ tasksRouter
   .get((req, res, next) => {
     TasksService.getAllTasksByFamily(req.app.get('db'), req.user.family)
       .then(tasks => {
-        // console.log('tasks', tasks)
         res.json(tasks)
       })
       .catch(next)
@@ -70,13 +69,11 @@ tasksRouter
       .catch(next)
   })
   .patch(jsonParser, (req, res, next) => {
-    // console.log('req.body', req.body)
-    const user_id = req.user.id
     const { title, points, complete } = req.body
+    const user_id = complete ? req.user.id : null
     const taskToUpdate = { title, points, complete, user_id }
-    // console.log('taskToUpdate', taskToUpdate)
     const numberOfValues = Object.values(taskToUpdate).filter(value => value != null).length
-    // console.log('numberOfValues', numberOfValues)
+
     if (numberOfValues === 0) {
       return res.status(400).json({
         error: { message: `Request body must contain either title or points` }

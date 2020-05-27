@@ -7,17 +7,6 @@ const db = knex({
   connection: DATABASE_URL
 })
 
-// const db = knex({
-//   client: 'pg',
-//   connection: {
-//     host: '127.0.0.1',
-//     user: 'bmckenna',
-//     password: 'K33psq10',
-//     database: 'myfamily',
-//     timezone: 'UTC'
-//   }
-// })
-
 app.set('db', db)
 
 app.listen(PORT, () => {

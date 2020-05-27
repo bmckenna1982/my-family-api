@@ -17,7 +17,6 @@ const sanitizeUser = user => ({
 
 usersRouter
   .route('/')
-  // .all(requireAuth)
   .get(requireAuth, (req, res, next) => {
     UsersService.getAllUsers(req.app.get('db'), req.user.family)
       .then(users => {
@@ -51,7 +50,6 @@ usersRouter
 
         return UsersService.hashPassword(password)
           .then(hashedPassword => {
-            // console.log('hashedPassword', hashedPassword)
             const newUser = {
               email,
               password: hashedPassword,
@@ -87,7 +85,6 @@ usersRouter
   .all(requireAuth, (req, res, next) => {
     UsersService.getById(req.app.get('db'), req.params.user_id)
       .then(user => {
-        console.log('user', user)
         if (!user) {
           return res.status(404).json({
             error: { message: `User doesn't exist` }
