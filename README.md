@@ -2,6 +2,9 @@
 
 This is the REST API server for MyFamily. It supports both open and protected endpoints and is built around PostgreSQL database.
 
+## Live Site
+[MyFamily](https://my-family.now.sh/)
+
 ## Set up
 
 1. Clone this repository to your local machine `git clone https://github.com/bmckenna1982/my-family-api.git NEW-PROJECTS-NAME` 
