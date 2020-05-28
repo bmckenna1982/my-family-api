@@ -6,24 +6,15 @@ const UsersService = {
   getAllUsers(knex, family) {
     return knex
       // .select('*')
-      .from('users AS usr')
-      .where('usr.family', family)
+      .from('users')
+      .where('family', family)
       .select(
-        'usr.id',
-        'usr.first_name',
-        'usr.last_name',
-        'usr.family',
-        'usr.email',
-        knex.raw(
-          `sum(tasks.points) AS points`
-        ),
+        'id',
+        'first_name',
+        'last_name',
+        'family',
+        'email',
       )
-      .leftJoin(
-        'tasks',
-        'usr.id',
-        'tasks.user_id',
-      )
-      .groupBy('usr.id')
   },
 
   insertUser(knex, newUser) {
@@ -36,37 +27,16 @@ const UsersService = {
 
   getById(knex, id) {
     return knex
-      .from('users AS usr')
-      .where('usr.id', id)
+      // .select('*')
+      .from('users')
       .select(
-        'usr.first_name',
-        'usr.last_name',
-        'usr.family',
-        'usr.email',
-        // knex.raw(
-        //   `sum(tasks.points) AS points`
-        // ),
+        'id',
+        'first_name',
+        'last_name',
+        'family',
+        'email',
       )
-      .sum('tasks.points as p')
-      .leftJoin(
-        'tasks',
-        'usr.id',
-        'tasks.user_id',
-      )
-
-      .leftJoin(
-        'rewards',
-        'usr.id',
-        'rewards.user_id'
-      )
-      .sum('rewards.points as rP')
-      // .innerJoin(
-      //   'rewards',
-      //   'usr.id',
-      //   'rewards.user_id',
-      // )
-      // .where(knex.raw('rewards.claimed = true'))
-      .groupBy('usr.id')
+      .where({ id })
       .first()
   },
 
