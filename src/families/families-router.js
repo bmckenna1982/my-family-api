@@ -16,7 +16,6 @@ familiesRouter
   .get((req, res, next) => {
     FamiliesService.getAllFamilies(req.app.get('db'))
       .then(families => {
-        console.log('families', families)
         res.json(families)
       })
       .catch(next)

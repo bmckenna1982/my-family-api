@@ -16,7 +16,6 @@ pointsRouter
   .get((req, res, next) => {
     PointsService.getRewardsPointsByUser(req.app.get('db'), req.user.id)
       .then(rewardPoints => {
-        console.log('rewardPoints', rewardPoints)
         const points = rewardPoints
           ? res.task_points - rewardPoints.points
           : res.task_points

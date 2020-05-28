@@ -20,7 +20,6 @@ usersRouter
   .get(requireAuth, (req, res, next) => {
     UsersService.getAllUsers(req.app.get('db'), req.user.family)
       .then(users => {
-        console.log('users', users)
         res.json(users)
       })
       .catch(next)
@@ -61,7 +60,6 @@ usersRouter
 
             return UsersService.insertUser(req.app.get('db'), newUser)
               .then(user => {
-                console.log('newUser', newUser)
                 res
                   .status(201)
                   .location(path.posix.join(req.originalUrl, `/${user.id}`))
