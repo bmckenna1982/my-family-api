@@ -69,9 +69,13 @@ tasksRouter
       .catch(next)
   })
   .patch(jsonParser, (req, res, next) => {
-    const { title, points, complete, completed_date, user_id } = req.body
-    // const user_id = (!complete) ? req.user.id : null
-    const taskToUpdate = { title, points, complete, user_id, completed_date }
+    const { title, points, complete, completed_date } = req.body
+    const user_id = (!req.body.user_id)
+      ? req.user.id
+      : req.body.user_id
+
+    const taskToUpdate = { title, points, complete, completed_date }
+    taskToUpdate.user_id = user_id
     const numberOfValues = Object.values(taskToUpdate).filter(value => value != null).length
 
     if (numberOfValues === 0) {
