@@ -24,5 +24,25 @@ pointsRouter
       .catch(next)
   })
 
+pointsRouter
+  .route('/:user_id')
+  .all(requireAuth, (req, res, next) => {
+    PointsService.getTasksPointsByUser(req.app.get('db'), req.params.user_id)
+      .then(data => {
+        res.task_points = data ? data.points : 0
+        next()
+      })
+  })
+  .get((req, res, next) => {
+    PointsService.getRewardsPointsByUser(req.app.get('db'), req.params.user_id)
+      .then(rewardPoints => {
+        const points = rewardPoints
+          ? res.task_points - rewardPoints.points
+          : res.task_points
+        res.json(points)
+      })
+      .catch(next)
+  })
+
 
 module.exports = pointsRouter
