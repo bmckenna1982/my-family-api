@@ -29,7 +29,6 @@ const clearSchedule = () => {
   )
 }
 
-// console.log('schedule', schedule)
 const inserts = function () {
   const insertPromises = [];
   schedule.forEach(function (game) {
